@@ -161,6 +161,8 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
 
 handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
     true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
+    {ok, #config{pid=Pid}} = dict:find(ConfName, Confs),
+    supervisor:terminate_child(econfig_watcher_sup, Pid),
     {reply, ok, State#state{confs=dict:erase(ConfName, Confs)}};
 
 handle_call({reload, {ConfName, IniFiles0}}, From,
