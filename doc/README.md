@@ -41,5 +41,6 @@ For issues, comments or feedback please [create an issue!] [1]
 <tr><td><a href="econfig_file_writer.md" class="module">econfig_file_writer</a></td></tr>
 <tr><td><a href="econfig_server.md" class="module">econfig_server</a></td></tr>
 <tr><td><a href="econfig_sup.md" class="module">econfig_sup</a></td></tr>
-<tr><td><a href="econfig_util.md" class="module">econfig_util</a></td></tr></table>
+<tr><td><a href="econfig_util.md" class="module">econfig_util</a></td></tr>
+<tr><td><a href="econfig_watcher.md" class="module">econfig_watcher</a></td></tr></table>
 

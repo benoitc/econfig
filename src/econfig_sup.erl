@@ -9,9 +9,6 @@
 %% Supervisor callbacks
 -export([init/1]).
 
-%% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
-
 %% ===================================================================
 %% API functions
 %% ===================================================================
@@ -24,9 +21,15 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
+    %% main config server
     Server = {econfig_server,
               {econfig_server, start_link, []},
               permanent, 5000, worker, [econfig_server]},
 
-    {ok, { {one_for_one, 5, 10}, [Server]} }.
+    %% watchr supervisor spec
+    WatcherSup = {econfig_watcher_sup,
+                  {econfig_watcher_sup, start_link, []},
+                  permanent, infinity, supervisor, [econfig_watcher_sup]},
+
+    {ok, { {one_for_one, 5, 10}, [Server, WatcherSup]} }.
 

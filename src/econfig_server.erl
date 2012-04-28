@@ -2,6 +2,8 @@
 -behaviour(gen_server).
 
 -export([register_config/2,
+         reload/2,
+         all/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
@@ -15,8 +17,7 @@
          terminate/2,
          code_change/3]).
 
--record(config, {notify_funs = [],
-                 files = dict:new()}).
+-record(config, {files = dict:new()}).
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -25,6 +26,15 @@ start_link() ->
 register_config(ConfigName, IniFiles) ->
     gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles}},
                     infinity).
+
+
+reload(ConfigName, IniFiles) ->
+    gen_server:call(?MODULE, {reload, {ConfigName, IniFiles}},
+                    infinity).
+
+all(ConfigName) ->
+    Matches = ets:match(?MODULE, {{ConfigName, '$1', '$2'}, '$3'}),
+    [{Section, Key, Value} || [Section, Key, Value] <- Matches].
 
 
 get_value(ConfigName, Section0) ->
@@ -93,6 +103,11 @@ handle_call({register_conf, {ConfName, IniFiles}}, _From,
             {{error, Error}, State}
         end,
     {reply, Resp, NewState};
+
+handle_call({reload, {ConfName, IniFiles}}, From, State) ->
+    true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
+    handle_call({register_conf, {ConfName, IniFiles}}, From, State);
+
 
 handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
             #config{files=Files}=State) ->

@@ -15,7 +15,7 @@ build: depends
 	$(REBAR) compile
 
 depends:
-	@if test ! -d ./deps; t@hen \
+	@if test ! -d ./deps; then \
 		$(REBAR) get-deps; \
 	else \
 		$(REBAR) update-deps; \

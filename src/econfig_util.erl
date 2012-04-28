@@ -1,8 +1,16 @@
 -module(econfig_util).
 
--export([implode/2,
+-export([find_ini_files/1,
+         implode/2,
          abs_pathname/1,
          to_list/1]).
+
+
+find_ini_files(Path) ->
+    {ok, Files} = file:list_dir(Path),
+    IniFiles = [filename:join(Path, Name) || Name <- Files,
+        ".ini" =:= filename:extension(Name)],
+    lists:usort(IniFiles).
 
 implode(List, Sep) ->
     implode(List, Sep, []).
@@ -13,8 +21,6 @@ implode([H], Sep, Acc) ->
     implode([], Sep, [H|Acc]);
 implode([H|T], Sep, Acc) ->
     implode(T, Sep, [Sep,H|Acc]).
-
-
 
 % given a pathname "../foo/bar/" it gives back the fully qualified
 % absolute pathname.
