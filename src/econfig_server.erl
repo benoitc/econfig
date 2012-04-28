@@ -1,7 +1,13 @@
+%%% -*- erlang -*-
+%%%
+%%% This file is part of econfig released under the Apache 2 license.
+%%% See the NOTICE for more information.
+
 -module(econfig_server).
 -behaviour(gen_server).
 
 -export([register_config/2, register_config/3,
+         unregister_config/1,
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
          all/1,
@@ -35,6 +41,10 @@ register_config(ConfigName, IniFiles, Options) ->
     gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles,
                                               Options}},
                     infinity).
+
+%% @doc unregister a conf
+unregister_config(ConfigName) ->
+    gen_server:call(?MODULE, {unregister_conf, ConfigName}).
 
 %% @doc Subscribe to config events for a config named `ConfigName'
 %%
@@ -148,6 +158,10 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
             {{error, Error}, State}
         end,
     {reply, Resp, NewState};
+
+handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
+    true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
+    {reply, ok, State#state{confs=dict:erase(ConfName, Confs)}};
 
 handle_call({reload, {ConfName, IniFiles0}}, From,
             #state{confs=Confs}=State) ->
