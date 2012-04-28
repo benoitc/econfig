@@ -1,7 +1,8 @@
 -module(econfig_server).
 -behaviour(gen_server).
 
--export([register_config/2,
+-export([register_config/2, register_config/3,
+         subscribe/1, unsubscribe/1,
          reload/2,
          all/1,
          get_value/2, get_value/3, get_value/4,
@@ -17,32 +18,53 @@
          terminate/2,
          code_change/3]).
 
--record(config, {files = dict:new()}).
+-record(config, {confs = dict:new()}).
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %% @doc register inifiles
 register_config(ConfigName, IniFiles) ->
-    gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles}},
+    register_config(ConfigName, IniFiles, []).
+
+register_config(ConfigName, IniFiles, Options) ->
+    gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles,
+                                              Options}},
                     infinity).
 
+%% @doc Subscribe to config events for a config named `ConfigName'
+%%
+%% The message received to each subscriber will be of the form:
+%%
+%% `{config_updated, ConfigName, {Section, Key}}'
+%%
+%% @end
+subscribe(ConfigName) ->
+    gproc:reg({p,l,{config_updated, ConfigName}}).
 
+%% @doc Remove subscribtion created using `subscribe(ConfigName)'
+%%
+%% @end
+unsubscribe(ConfigName) ->
+    gproc:unreg({p,l,{config_updated, ConfigName}}).
+
+%% @doc reload the configuration
 reload(ConfigName, IniFiles) ->
     gen_server:call(?MODULE, {reload, {ConfigName, IniFiles}},
                     infinity).
 
+%% @doc get all values of a configuration
 all(ConfigName) ->
     Matches = ets:match(?MODULE, {{ConfigName, '$1', '$2'}, '$3'}),
     [{Section, Key, Value} || [Section, Key, Value] <- Matches].
 
-
+%% @doc get values of a section
 get_value(ConfigName, Section0) ->
     Section = econfig_util:to_list(Section0),
     Matches = ets:match(?MODULE, {{ConfigName, Section, '$1'}, '$2'}),
     [{Key, Value} || [Key, Value] <- Matches].
 
-
+%% @doc get value for a key in a section
 get_value(ConfigName, Section, Key) ->
     get_value(ConfigName, Section, Key, undefined).
 
@@ -55,6 +77,7 @@ get_value(ConfigName, Section0, Key0, Default) ->
         [{_, Match}] -> Match
     end.
 
+%% @doc set a value
 set_value(ConfigName, Section, Key, Value) ->
     set_value(ConfigName, Section, Key, Value, true).
 
@@ -66,6 +89,7 @@ set_value(ConfigName, Section0, Key0, Value0, Persist) ->
     gen_server:call(?MODULE, {set, {ConfigName, Section, Key, Value,
                                     Persist}}, infinity).
 
+%% @doc delete a value
 delete_value(ConfigName, Section, Key) ->
     delete_value(ConfigName, Section, Key, true).
 
@@ -78,7 +102,6 @@ delete_value(ConfigName, Section0, Key0, Persist) ->
 
 
 
-
 %% -----------------------------------------------
 %% gen_server callbacks
 %% -----------------------------------------------
@@ -88,8 +111,8 @@ init(_) ->
     ets:new(?MODULE, [named_table, set, protected]),
     {ok, #config{}}.
 
-handle_call({register_conf, {ConfName, IniFiles}}, _From,
-            #config{files=Files}=State) ->
+handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
+            #config{confs=Confs}=State) ->
     {Resp, NewState} =
         try
             lists:map(fun(IniFile) ->
@@ -98,7 +121,18 @@ handle_call({register_conf, {ConfName, IniFiles}}, _From,
                         ets:insert(?MODULE, ParsedIniValues)
                 end, IniFiles),
             WriteFile = lists:last(IniFiles),
-            {ok, State#config{files=dict:store(ConfName, WriteFile, Files)}}
+            Pid = case proplists:get_value(autoreload, Options) of
+                true ->
+                    {ok, Pid0} =
+                                econfig_watcher_sup:start_watcher(ConfName,
+                                                                  WriteFile),
+                    Pid0;
+                _ ->
+                    nil
+            end,
+            Confs1 = dict:store(ConfName, {WriteFile, Options, Pid},
+                                Confs),
+            {ok, State#config{confs=Confs1}}
         catch _Tag:Error ->
             {{error, Error}, State}
         end,
@@ -110,9 +144,9 @@ handle_call({reload, {ConfName, IniFiles}}, From, State) ->
 
 
 handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
-            #config{files=Files}=State) ->
-    Result = case {Persist, dict:find(ConfName, Files)} of
-        {true, {ok, FileName}} ->
+            #config{confs=Confs}=State) ->
+    Result = case {Persist, dict:find(ConfName, Confs)} of
+        {true, {ok, {FileName, _, _}}} ->
             econfig_file_writer:save_to_file({{Section, Key}, Value},
                                              FileName);
         _ ->
@@ -122,20 +156,22 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
         ok ->
             true = ets:insert(?MODULE, {{ConfName, Section, Key},
                                         Value}),
+            notify_change(ConfName, Section, Key),
             {reply, ok, State};
         _Error ->
             {reply, Result, State}
     end;
 
 handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
-            #config{files=Files}=State) ->
+            #config{confs=Confs}=State) ->
     true = ets:delete(?MODULE, {ConfName, Section, Key}),
-    case {Persist, dict:find(ConfName, Files)} of
-        {true, {ok, FileName}} ->
+    case {Persist, dict:find(ConfName, Confs)} of
+        {true, {ok, {FileName, _, _}}} ->
             econfig_file_writer:save_to_file({{Section, Key}, ""}, FileName);
         _ ->
             ok
     end,
+    notify_change(ConfName, Section, Key),
     {reply, ok, State};
 
 handle_call(_Msg, _From, State) ->
@@ -160,6 +196,9 @@ terminate(_Reason , _State) ->
 %% internal functions
 %% -----------------------------------------------
 
+notify_change(ConfigName, Section, Key) ->
+    gproc:send({p, l, {config_updated, ConfigName}},
+               {config_updated, ConfigName, {Section, Key}}).
 
 parse_ini_file(ConfName, IniFile) ->
     IniFilename = econfig_util:abs_pathname(IniFile),
