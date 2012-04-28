@@ -2,7 +2,9 @@
 -behaviour(gen_server).
 
 -export([register_config/2,
-         get_value/2, get_value/3, get_value/4]).
+         get_value/2, get_value/3, get_value/4,
+         set_value/4, set_value/5,
+         delete_value/3, delete_value/4]).
 
 -export([start_link/0]).
 
@@ -43,6 +45,29 @@ get_value(ConfigName, Section0, Key0, Default) ->
         [{_, Match}] -> Match
     end.
 
+set_value(ConfigName, Section, Key, Value) ->
+    set_value(ConfigName, Section, Key, Value, true).
+
+set_value(ConfigName, Section0, Key0, Value0, Persist) ->
+    Section = econfig_util:to_list(Section0),
+    Key = econfig_util:to_list(Key0),
+    Value = econfig_util:to_list(Value0),
+
+    gen_server:call(?MODULE, {set, {ConfigName, Section, Key, Value,
+                                    Persist}}, infinity).
+
+delete_value(ConfigName, Section, Key) ->
+    delete_value(ConfigName, Section, Key, true).
+
+delete_value(ConfigName, Section0, Key0, Persist) ->
+    Section = econfig_util:to_list(Section0),
+    Key = econfig_util:to_list(Key0),
+
+    gen_server:call(?MODULE, {delete, {ConfigName, Section, Key,
+                                       Persist}}, infinity).
+
+
+
 
 %% -----------------------------------------------
 %% gen_server callbacks
@@ -62,15 +87,44 @@ handle_call({register_conf, {ConfName, IniFiles}}, _From,
                                                                IniFile),
                         ets:insert(?MODULE, ParsedIniValues)
                 end, IniFiles),
-            WriteFile = case IniFiles of
-                [_|_] -> lists:last(IniFiles);
-                _ -> undefined
-            end,
+            WriteFile = lists:last(IniFiles),
             {ok, State#config{files=dict:store(ConfName, WriteFile, Files)}}
         catch _Tag:Error ->
             {{error, Error}, State}
         end,
     {reply, Resp, NewState};
+
+handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
+            #config{files=Files}=State) ->
+    Result = case {Persist, dict:find(ConfName, Files)} of
+        {true, {ok, FileName}} ->
+            econfig_file_writer:save_to_file({{Section, Key}, Value},
+                                             FileName);
+        _ ->
+            ok
+    end,
+    case Result of
+        ok ->
+            lager:info("insert ~p~n", [{{ConfName, Section, Key},
+                                        Value}]),
+            true = ets:insert(?MODULE, {{ConfName, Section, Key},
+                                        Value}),
+            {reply, ok, State};
+        _Error ->
+            lager:info("got an error ~p", [Result]),
+            {reply, Result, State}
+    end;
+
+handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
+            #config{files=Files}=State) ->
+    true = ets:delete(?MODULE, {ConfName, Section, Key}),
+    case {Persist, dict:find(ConfName, Files)} of
+        {true, {ok, FileName}} ->
+            econfig_file_writer:save_to_file({{Section, Key}, ""}, FileName);
+        _ ->
+            ok
+    end,
+    {reply, ok, State};
 
 handle_call(_Msg, _From, State) ->
     {reply, ok, State}.

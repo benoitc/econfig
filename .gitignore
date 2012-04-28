@@ -9,4 +9,6 @@ doc/*.css
 doc/erlang.png
 doc/edoc-info
 t/*.beam
+log
+log/*
 examples/*.beam
