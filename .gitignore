@@ -1,13 +1,8 @@
 ebin
 *.swp
 *.dump
-edoc-info
 .DS_Store
 deps/
-doc/*.html
-doc/*.css
-doc/erlang.png
-doc/edoc-info
 t/*.beam
 log
 log/*

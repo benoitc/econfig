@@ -21,7 +21,7 @@
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-
+%% @doc register inifiles
 register_config(ConfigName, IniFiles) ->
     gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles}},
                     infinity).
@@ -105,13 +105,10 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
     end,
     case Result of
         ok ->
-            lager:info("insert ~p~n", [{{ConfName, Section, Key},
-                                        Value}]),
             true = ets:insert(?MODULE, {{ConfName, Section, Key},
                                         Value}),
             {reply, ok, State};
         _Error ->
-            lager:info("got an error ~p", [Result]),
             {reply, Result, State}
     end;
 
@@ -160,7 +157,6 @@ parse_ini_file(ConfName, IniFile) ->
         {error, enoent} ->
             Fmt = "Couldn't find server configuration file ~s.",
             Msg = list_to_binary(io_lib:format(Fmt, [IniFilename])),
-            lager:error("~s~n", [Msg]),
             throw({startup_error, Msg})
     end,
 
