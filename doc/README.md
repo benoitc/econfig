@@ -18,10 +18,30 @@ econfig
 Examples
 --------
 
+    
 
-
-To be done
-
+1> application:start(gproc).    
+ok    
+2> application:start(econfig).    
+ok    
+3> econfig:register_config(couchdb, ["/Users/benoitc/refuge/rcouch/rel/rcouch/etc/default.ini", "/Users/benoitc/refuge/rcouch/rel/rcouch/etc/local.ini"], [autoreload]).    
+ok    
+4> econfig:subscribe(couchdb).    
+true    
+5> econfig:get_value(couchdb, "couchdb").    
+[{"delayed_commits","true"},     
+{"file_compression","snappy"},     
+{"os_process_timeout","5000"},     
+{"uri_file","./data/couch.uri"},     
+{"index_dir","./data"},     
+{"max_document_size","4294967296"},     
+{"database_dir","./data"},     
+{"max_dbs_open","100"}]    
+6> econfig:set_value(couchdb, "ssl", "test", "1").    
+ok    
+7> flush().    
+Shell got {config_updated,couchdb,{"ssl","test"}}    
+ok
 
 
 
@@ -37,10 +57,12 @@ For issues, comments or feedback please [create an issue!] [1]
 
 
 <table width="100%" border="0" summary="list of modules">
+<tr><td><a href="econfig.md" class="module">econfig</a></td></tr>
 <tr><td><a href="econfig_app.md" class="module">econfig_app</a></td></tr>
 <tr><td><a href="econfig_file_writer.md" class="module">econfig_file_writer</a></td></tr>
 <tr><td><a href="econfig_server.md" class="module">econfig_server</a></td></tr>
 <tr><td><a href="econfig_sup.md" class="module">econfig_sup</a></td></tr>
 <tr><td><a href="econfig_util.md" class="module">econfig_util</a></td></tr>
-<tr><td><a href="econfig_watcher.md" class="module">econfig_watcher</a></td></tr></table>
+<tr><td><a href="econfig_watcher.md" class="module">econfig_watcher</a></td></tr>
+<tr><td><a href="econfig_watcher_sup.md" class="module">econfig_watcher_sup</a></td></tr></table>
 

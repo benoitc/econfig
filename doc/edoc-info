@@ -1,4 +1,4 @@
 {application,econfig}.
 {packages,[]}.
-{modules,[econfig_app,econfig_file_writer,econfig_server,econfig_sup,
-          econfig_util,econfig_watcher]}.
+{modules,[econfig,econfig_app,econfig_file_writer,econfig_server,econfig_sup,
+          econfig_util,econfig_watcher,econfig_watcher_sup]}.
