@@ -9,6 +9,7 @@
          unregister_config/1,
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
+         start_autoreload/1, stop_autoreload/1,
          all/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
@@ -51,6 +52,13 @@ reload(ConfigName) ->
 %% @doc reload the configuration
 reload(ConfigName, IniFiles) ->
     econfig_server:reload(ConfigName, IniFiles).
+
+
+start_autoreload(ConfigName) ->
+    econfig_server:start_autoreload(ConfigName).
+
+stop_autoreload(ConfigName) ->
+    econfig_server:stop_autoreload(ConfigName).
 
 %% @doc get all values of a configuration
 all(ConfigName) ->

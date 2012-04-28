@@ -10,6 +10,7 @@
          unregister_config/1,
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
+         start_autoreload/1, stop_autoreload/1,
          all/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
@@ -70,6 +71,13 @@ reload(ConfigName) ->
 reload(ConfigName, IniFiles) ->
     gen_server:call(?MODULE, {reload, {ConfigName, IniFiles}},
                     infinity).
+
+start_autoreload(ConfigName) ->
+    gen_server:call(?MODULE, {start_autoreload, ConfigName}).
+
+stop_autoreload(ConfigName) ->
+    gen_server:call(?MODULE, {stop_autoreload, ConfigName}).
+
 
 %% @doc get all values of a configuration
 all(ConfigName) ->
@@ -161,8 +169,12 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
 
 handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
     true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
-    {ok, #config{pid=Pid}} = dict:find(ConfName, Confs),
-    supervisor:terminate_child(econfig_watcher_sup, Pid),
+    case dict:find(ConfName, Confs) of
+        {ok, #config{pid=Pid}} when is_pid(Pid) ->
+            supervisor:terminate_child(econfig_watcher_sup, Pid);
+        _ ->
+            ok
+    end,
     {reply, ok, State#state{confs=dict:erase(ConfName, Confs)}};
 
 handle_call({reload, {ConfName, IniFiles0}}, From,
@@ -177,6 +189,30 @@ handle_call({reload, {ConfName, IniFiles0}}, From,
             IniFiles0
     end,
     handle_call({register_conf, {ConfName, IniFiles}}, From, State);
+
+
+handle_call({start_autoreload, ConfName}, _From, #state{confs=Confs}=State) ->
+    case dict:find(ConfName, Confs) of
+        {ok, #config{inifiles=IniFiles}=Config} ->
+            {ok, Pid} = econfig_watcher_sup:start_watcher(ConfName,
+                                                          IniFiles),
+            Config1 = Config#config{pid=Pid},
+            {reply, ok, State#state{confs=dict:store(ConfName, Config1,
+                                                     Confs)}};
+        _  ->
+            {reply, ok, State}
+    end;
+
+handle_call({stop_autoreload, ConfName}, _From, #state{confs=Confs}=State) ->
+    case dict:find(ConfName, Confs) of
+        {ok, #config{pid=Pid}=Config} when is_pid(Pid) ->
+            supervisor:terminate_child(econfig_watcher_sup, Pid),
+            Config1 = Config#config{pid=nil},
+            {reply, ok, State#state{confs=dict:store(ConfName, Config1,
+                                                     Confs)}};
+        _  ->
+            {reply, ok, State}
+    end;
 
 
 handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
