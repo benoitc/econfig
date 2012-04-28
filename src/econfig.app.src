@@ -1,0 +1,12 @@
+{application, econfig,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { econfig_app, []}},
+  {env, []}
+ ]}.
