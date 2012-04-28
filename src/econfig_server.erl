@@ -3,7 +3,7 @@
 
 -export([register_config/2, register_config/3,
          subscribe/1, unsubscribe/1,
-         reload/2,
+         reload/1, reload/2,
          all/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
@@ -18,7 +18,11 @@
          terminate/2,
          code_change/3]).
 
--record(config, {confs = dict:new()}).
+-record(state, {confs = dict:new()}).
+-record(config, {write_file,
+                 pid=nil,
+                 options,
+                 inifiles}).
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -47,6 +51,10 @@ subscribe(ConfigName) ->
 %% @end
 unsubscribe(ConfigName) ->
     gproc:unreg({p,l,{config_updated, ConfigName}}).
+
+%% @doc reload the configuration
+reload(ConfigName) ->
+    reload(ConfigName, nil).
 
 %% @doc reload the configuration
 reload(ConfigName, IniFiles) ->
@@ -109,10 +117,10 @@ delete_value(ConfigName, Section0, Key0, Persist) ->
 init(_) ->
     process_flag(trap_exit, true),
     ets:new(?MODULE, [named_table, set, protected]),
-    {ok, #config{}}.
+    {ok, #state{}}.
 
 handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
-            #config{confs=Confs}=State) ->
+            #state{confs=Confs}=State) ->
     {Resp, NewState} =
         try
             lists:map(fun(IniFile) ->
@@ -125,28 +133,40 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
                 true ->
                     {ok, Pid0} =
                                 econfig_watcher_sup:start_watcher(ConfName,
-                                                                  WriteFile),
+                                                                  IniFiles),
                     Pid0;
                 _ ->
                     nil
             end,
-            Confs1 = dict:store(ConfName, {WriteFile, Options, Pid},
+            Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
+                                                  pid=Pid,
+                                                  options=Options,
+                                                  inifiles=IniFiles},
                                 Confs),
-            {ok, State#config{confs=Confs1}}
+            {ok, State#state{confs=Confs1}}
         catch _Tag:Error ->
             {{error, Error}, State}
         end,
     {reply, Resp, NewState};
 
-handle_call({reload, {ConfName, IniFiles}}, From, State) ->
+handle_call({reload, {ConfName, IniFiles0}}, From,
+            #state{confs=Confs}=State) ->
     true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
+    IniFiles = case IniFiles0 of
+        nil ->
+            {ok, #config{inifiles=IniFiles1}} = dict:find(ConfName,
+                                                         Confs),
+            IniFiles1;
+        _ ->
+            IniFiles0
+    end,
     handle_call({register_conf, {ConfName, IniFiles}}, From, State);
 
 
 handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
-            #config{confs=Confs}=State) ->
+            #state{confs=Confs}=State) ->
     Result = case {Persist, dict:find(ConfName, Confs)} of
-        {true, {ok, {FileName, _, _}}} ->
+        {true, {ok, #config{write_file=FileName}}} ->
             econfig_file_writer:save_to_file({{Section, Key}, Value},
                                              FileName);
         _ ->
@@ -163,10 +183,10 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
     end;
 
 handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
-            #config{confs=Confs}=State) ->
+            #state{confs=Confs}=State) ->
     true = ets:delete(?MODULE, {ConfName, Section, Key}),
     case {Persist, dict:find(ConfName, Confs)} of
-        {true, {ok, {FileName, _, _}}} ->
+        {true, {ok, #config{write_file=FileName}}} ->
             econfig_file_writer:save_to_file({{Section, Key}, ""}, FileName);
         _ ->
             ok

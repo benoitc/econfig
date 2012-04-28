@@ -13,20 +13,20 @@
 -record(watcher, {tc,
                   files = [],
                   conf,
-                  path}).
+                  paths}).
 
 -record(file, {path, last_mod}).
 
-start_link(ConfName, Path) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [ConfName, Path] , []).
+start_link(ConfName, Paths) ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [ConfName, Paths] , []).
 
-init([ConfName, Path]) ->
-    Files = find_files(Path),
+init([ConfName, Paths]) ->
+    Files = find_files(Paths),
     Tc = erlang:start_timer(scan_delay(), self(), scan),
     InitState = #watcher{tc=Tc,
                          files=Files,
                          conf=ConfName,
-                         path=Path},
+                         paths=Paths},
     {ok, InitState}.
 
 handle_call(_Req, _From, State) ->
@@ -37,8 +37,8 @@ handle_cast(_Event, State) ->
 
 
 handle_info({timeout, Tc, scan}, State=#watcher{tc=Tc, files=OldFiles,
-                                                conf=Conf, path=Path}) ->
-    NewFiles = find_files(Path),
+                                                conf=Conf, paths=Paths}) ->
+    NewFiles = find_files(Paths),
     case OldFiles -- NewFiles of
         [] ->
             ok;
@@ -65,14 +65,20 @@ terminate(_Reason, _State) ->
 %% internal functions
 %%
 
-find_files(Path) ->
+find_files(Paths) ->
+    find_files(Paths, []).
+
+find_files([], Acc) ->
+    Acc;
+find_files([Path | Rest], Acc) ->
     case filelib:is_file(Path) of
         true ->
-            [file_info(Path)];
+            Acc1 = Acc ++  [file_info(Path)],
+            find_files(Rest, Acc1);
         false ->
             IniFiles = econfig_util:find_ini_files(Path),
-            lists:map(fun file_info/1, IniFiles)
-
+            Acc1 = Acc ++ lists:map(fun file_info/1, IniFiles),
+            find_files(Rest, Acc1)
     end.
 
 scan_delay() ->
