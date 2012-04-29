@@ -28,13 +28,13 @@ find_files(Paths, Fun) ->
 find_files([], Acc, _Fun) ->
     Acc;
 find_files([Path | Rest], Acc, Fun) ->
-    case filelib:is_file(Path) of
+    case filelib:is_dir(Path) of
         true ->
-            Acc1 = Acc ++  [Fun(Path)],
-            find_files(Rest, Acc1, Fun);
-        false ->
             IniFiles = econfig_util:find_ini_files(Path),
             Acc1 = Acc ++ lists:map(Fun, IniFiles),
+            find_files(Rest, Acc1, Fun);
+        false ->
+            Acc1 = Acc ++  [Fun(Path)],
             find_files(Rest, Acc1, Fun)
     end.
 

@@ -278,7 +278,8 @@ notify_change(ConfigName, Section, Key) ->
                {config_updated, ConfigName, {Section, Key}}).
 
 
-parse_inis(ConfName, IniFiles) ->
+parse_inis(ConfName, IniFiles0) ->
+    IniFiles = econfig_util:find_files(IniFiles0),
     lists:map(fun(IniFile) ->
                 {ok, ParsedIniValues} = parse_ini_file(ConfName, IniFile),
                 ets:insert(?MODULE, ParsedIniValues)
