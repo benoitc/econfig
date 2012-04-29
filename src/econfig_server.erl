@@ -201,7 +201,6 @@ handle_call({reload, {ConfName, IniFiles0}}, _From,
                                                       inifiles=IniFiles},
                                 Confs),
 
-            io:format("reload ~p~n", [IniFiles]),
             {reply, ok, State#state{confs=Confs1}};
         _ ->
             {reply, ok, State}

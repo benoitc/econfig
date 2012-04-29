@@ -48,9 +48,7 @@ handle_info({timeout, Tc, scan}, State=#watcher{tc=Tc, files=OldFiles,
         [] ->
             ok;
         _ ->
-            io:format("reloaded ~p~n",  [NewFiles]),
             IniFiles = lists:map(fun(#file{path=P}) -> P end, NewFiles),
-            io:format("reloaded ~p~n",  [IniFiles]),
             econfig_server:reload(Conf, IniFiles)
     end,
     {noreply, State#watcher{tc=erlang:start_timer(scan_delay(), self(),
