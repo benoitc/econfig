@@ -177,19 +177,35 @@ handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
     end,
     {reply, ok, State#state{confs=dict:erase(ConfName, Confs)}};
 
-handle_call({reload, {ConfName, IniFiles0}}, From,
+handle_call({reload, {ConfName, IniFiles0}}, _From,
             #state{confs=Confs}=State) ->
-    true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
-    IniFiles = case IniFiles0 of
-        nil ->
-            {ok, #config{inifiles=IniFiles1}} = dict:find(ConfName,
-                                                         Confs),
-            IniFiles1;
-        _ ->
-            IniFiles0
-    end,
-    handle_call({register_conf, {ConfName, IniFiles}}, From, State);
 
+    case dict:find(ConfName, Confs) of
+        {ok, #config{inifiles=IniFiles1, options=Options}=Conf} ->
+
+            true = ets:match_delete(?MODULE, {{ConfName, '_', '_'}, '_'}),
+            IniFiles = case IniFiles0 of
+                nil -> IniFiles1;
+                _ -> IniFiles0
+            end,
+
+            %% do the reload
+            lists:map(fun(IniFile) ->
+                        {ok, ParsedIniValues} = parse_ini_file(ConfName,
+                                                               IniFile),
+                        ets:insert(?MODULE, ParsedIniValues)
+                end, IniFiles),
+            WriteFile = lists:last(IniFiles),
+            Confs1 = dict:store(ConfName, Conf#config{write_file=WriteFile,
+                                                      options=Options,
+                                                      inifiles=IniFiles},
+                                Confs),
+
+            io:format("reload ~p~n", [IniFiles]),
+            {reply, ok, State#state{confs=Confs1}};
+        _ ->
+            {reply, ok, State}
+    end;
 
 handle_call({start_autoreload, ConfName}, _From, #state{confs=Confs}=State) ->
     case dict:find(ConfName, Confs) of
@@ -271,6 +287,7 @@ terminate(_Reason , _State) ->
 notify_change(ConfigName, Section, Key) ->
     gproc:send({p, l, {config_updated, ConfigName}},
                {config_updated, ConfigName, {Section, Key}}).
+
 
 parse_ini_file(ConfName, IniFile) ->
     IniFilename = econfig_util:abs_pathname(IniFile),

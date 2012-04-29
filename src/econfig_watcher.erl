@@ -26,7 +26,7 @@ start_link(ConfName, Paths) ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [ConfName, Paths] , []).
 
 init([ConfName, Paths]) ->
-    Files = find_files(Paths),
+    Files = econfig_util:find_files(Paths, fun file_info/1),
     Tc = erlang:start_timer(scan_delay(), self(), scan),
     InitState = #watcher{tc=Tc,
                          files=Files,
@@ -43,12 +43,14 @@ handle_cast(_Event, State) ->
 
 handle_info({timeout, Tc, scan}, State=#watcher{tc=Tc, files=OldFiles,
                                                 conf=Conf, paths=Paths}) ->
-    NewFiles = find_files(Paths),
+    NewFiles = econfig_util:find_files(Paths, fun file_info/1),
     case OldFiles -- NewFiles of
         [] ->
             ok;
         _ ->
+            io:format("reloaded ~p~n",  [NewFiles]),
             IniFiles = lists:map(fun(#file{path=P}) -> P end, NewFiles),
+            io:format("reloaded ~p~n",  [IniFiles]),
             econfig_server:reload(Conf, IniFiles)
     end,
     {noreply, State#watcher{tc=erlang:start_timer(scan_delay(), self(),
@@ -68,22 +70,6 @@ terminate(_Reason, _State) ->
 %% --
 %% internal functions
 %%
-
-find_files(Paths) ->
-    find_files(Paths, []).
-
-find_files([], Acc) ->
-    Acc;
-find_files([Path | Rest], Acc) ->
-    case filelib:is_file(Path) of
-        true ->
-            Acc1 = Acc ++  [file_info(Path)],
-            find_files(Rest, Acc1);
-        false ->
-            IniFiles = econfig_util:find_ini_files(Path),
-            Acc1 = Acc ++ lists:map(fun file_info/1, IniFiles),
-            find_files(Rest, Acc1)
-    end.
 
 scan_delay() ->
     case application:get_env(econfig, delay) of

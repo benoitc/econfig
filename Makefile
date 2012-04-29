@@ -11,15 +11,11 @@ clean:
 distclean: clean
 	@rm -rf deps
 
-build: depends
+build: deps
 	$(REBAR) compile
 
-depends:
-	@if test ! -d ./deps; then \
-		$(REBAR) get-deps; \
-	else \
-		$(REBAR) update-deps; \
-	fi
+deps:
+	$(REBAR) get-deps
 
 
-.PHONY: doc
+.PHONY: doc deps

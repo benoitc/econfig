@@ -6,6 +6,7 @@
 -module(econfig_util).
 
 -export([find_ini_files/1,
+         find_files/1, find_files/2, find_files/3,
          implode/2,
          abs_pathname/1,
          to_list/1]).
@@ -16,6 +17,27 @@ find_ini_files(Path) ->
     IniFiles = [filename:join(Path, Name) || Name <- Files,
         ".ini" =:= filename:extension(Name)],
     lists:usort(IniFiles).
+
+
+find_files(Paths) ->
+    find_files(Paths, [], fun(F) -> F end).
+
+find_files(Paths, Fun) ->
+    find_files(Paths, [], Fun).
+
+find_files([], Acc, _Fun) ->
+    Acc;
+find_files([Path | Rest], Acc, Fun) ->
+    case filelib:is_file(Path) of
+        true ->
+            Acc1 = Acc ++  [Fun(Path)],
+            find_files(Rest, Acc1, Fun);
+        false ->
+            IniFiles = econfig_util:find_ini_files(Path),
+            Acc1 = Acc ++ lists:map(Fun, IniFiles),
+            find_files(Rest, Acc1, Fun)
+    end.
+
 
 implode(List, Sep) ->
     implode(List, Sep, []).
