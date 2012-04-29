@@ -141,12 +141,7 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
             #state{confs=Confs}=State) ->
     {Resp, NewState} =
         try
-            lists:map(fun(IniFile) ->
-                        {ok, ParsedIniValues} = parse_ini_file(ConfName,
-                                                               IniFile),
-                        ets:insert(?MODULE, ParsedIniValues)
-                end, IniFiles),
-            WriteFile = lists:last(IniFiles),
+            WriteFile = parse_inis(ConfName, IniFiles),
             Pid = case proplists:get_value(autoreload, Options) of
                 true ->
                     {ok, Pid0} =
@@ -190,12 +185,7 @@ handle_call({reload, {ConfName, IniFiles0}}, _From,
             end,
 
             %% do the reload
-            lists:map(fun(IniFile) ->
-                        {ok, ParsedIniValues} = parse_ini_file(ConfName,
-                                                               IniFile),
-                        ets:insert(?MODULE, ParsedIniValues)
-                end, IniFiles),
-            WriteFile = lists:last(IniFiles),
+            WriteFile = parse_inis(ConfName, IniFiles),
             Confs1 = dict:store(ConfName, Conf#config{write_file=WriteFile,
                                                       options=Options,
                                                       inifiles=IniFiles},
@@ -286,6 +276,15 @@ terminate(_Reason , _State) ->
 notify_change(ConfigName, Section, Key) ->
     gproc:send({p, l, {config_updated, ConfigName}},
                {config_updated, ConfigName, {Section, Key}}).
+
+
+parse_inis(ConfName, IniFiles) ->
+    lists:map(fun(IniFile) ->
+                {ok, ParsedIniValues} = parse_ini_file(ConfName, IniFile),
+                ets:insert(?MODULE, ParsedIniValues)
+        end, IniFiles),
+    WriteFile = lists:last(IniFiles),
+    WriteFile.
 
 
 parse_ini_file(ConfName, IniFile) ->
