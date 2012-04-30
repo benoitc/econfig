@@ -30,6 +30,10 @@ manage changes from a full config directory.
 
 
 
+See the [NEWS](NEWS.md) for last changes.
+
+
+
 Examples
 --------
 
