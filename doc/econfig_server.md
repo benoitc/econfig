@@ -135,7 +135,9 @@ get value for a key in a section<a name="get_value-4"></a>
 
 
 
-`register_config(ConfigName, IniFiles) -> any()`
+<pre>register_config(ConfigName::term(), IniFiles::<a href="econfig.md#type-inifiles">econfig:inifiles()</a>) -> ok | {error, any()}</pre>
+<br></br>
+
 
 
 

@@ -25,7 +25,7 @@ can also subscribe to config updates events.
 
 
 
-Autoreload of the config when an INI file is supported, you can even
+Autoreload of the config when an INI file is updated is supported, you can even
 manage changes from a full config directory.
 
 
