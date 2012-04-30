@@ -3,6 +3,7 @@
 %%% This file is part of econfig released under the Apache 2 license.
 %%% See the NOTICE for more information.
 
+%% @doc Public API of econfig.
 -module(econfig).
 
 -export([register_config/2, register_config/3,
@@ -30,6 +31,12 @@ register_config(ConfigName, IniFiles) ->
 %% @doc register inifiles of config dirs with options
 %% For now the only option is  `autoreload' to auto reload the config on
 %% files or dirs changes.
+%% Configs can also be registererd in the app configuration at startup:
+%%
+%%      [confs, [{ConfigName, IniFile},
+%%               {ConfigName1, IniFiles1, Options}, ..]]
+%%
+%%
 register_config(ConfigName, IniFiles, Options) ->
     econfig_server:register_config(ConfigName, IniFiles, Options).
 
