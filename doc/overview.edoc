@@ -33,7 +33,8 @@ can also subscribe to config updates events.
 Autoreload of the config when an INI file is updated is supported, you can even
 manage changes from a full config directory.
 
-See the [NEWS](NEWS.md) for last changes.
+See the [NEWS](http://github.com/benoitc/econfig/blob/master/NEWS.md)
+for last changes.
 
 Examples
 --------
