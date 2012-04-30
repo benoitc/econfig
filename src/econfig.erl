@@ -15,15 +15,25 @@
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
 
+-type inifiles() :: [string()].
+-type options() :: [autoreload].
 
-%% @doc register inifiles
+
+-spec register_config(term(), econfig:inifiles()) -> ok | {error,
+                                                           any()}.
+%% @doc register inifiles or config dirs
 register_config(ConfigName, IniFiles) ->
     econfig_server:register_config(ConfigName, IniFiles).
 
-%% @doc register inifiles
+-spec register_config(term(), econfig:inifiles(), econfig:options())
+    -> ok | {error, any()}.
+%% @doc register inifiles of config dirs with options
+%% For now the only option is  `autoreload' to auto reload the config on
+%% files or dirs changes.
 register_config(ConfigName, IniFiles, Options) ->
     econfig_server:register_config(ConfigName, IniFiles, Options).
 
+-spec unregister_config(term()) -> ok.
 %% @doc unregister a conf
 unregister_config(ConfigName) ->
     econfig_server:unregister_config(ConfigName).

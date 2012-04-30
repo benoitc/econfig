@@ -34,6 +34,8 @@
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
+-spec register_config(term(), econfig:inifiles()) -> ok | {error,
+                                                           any()}.
 %% @doc register inifiles
 register_config(ConfigName, IniFiles) ->
     register_config(ConfigName, IniFiles, []).
