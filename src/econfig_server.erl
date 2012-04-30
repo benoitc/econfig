@@ -249,7 +249,6 @@ handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
             #state{confs=Confs}=State) ->
 
     true = ets:delete(?MODULE, {ConfName, Section, Key}),
-    notify_change(ConfName, Section, Key),
 
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
