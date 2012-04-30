@@ -1,11 +1,12 @@
 
 
 #Module econfig#
+* [Description](#description)
 * [Function Index](#index)
 * [Function Details](#functions)
 
 
-
+Public API of econfig.
 
 <a name="index"></a>
 
@@ -13,7 +14,7 @@
 
 
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
-For now the only option is  <code>autoreload</code> to auto reload the config on
+For now the only option is  <code>autoreload</code> to auto reload the config on  
 files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td>set a value.</td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td></td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
 
 
@@ -111,9 +112,19 @@ register inifiles or config dirs<a name="register_config-3"></a>
 
 
 
+
+
 register inifiles of config dirs with options
-For now the only option is  `autoreload` to auto reload the config on
-files or dirs changes.<a name="reload-1"></a>
+For now the only option is  `autoreload` to auto reload the config on  
+files or dirs changes.  
+Configs can also be registererd in the app configuration at startup:
+
+
+
+[confs, [{ConfigName, IniFile},                
+{ConfigName1, IniFiles1, Options}, ..]]
+
+<a name="reload-1"></a>
 
 ###reload/1##
 
