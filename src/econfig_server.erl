@@ -137,7 +137,8 @@ delete_value(ConfigName, Section0, Key0, Persist) ->
 init(_) ->
     process_flag(trap_exit, true),
     ets:new(?MODULE, [named_table, set, protected]),
-    {ok, #state{}}.
+    InitialState = initialize_app_confs(),
+    {ok, InitialState}.
 
 handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
             #state{confs=Confs}=State) ->
@@ -298,6 +299,38 @@ restart_autoreload(_) ->
 notify_change(ConfigName, Section, Key) ->
     gproc:send({p, l, {config_updated, ConfigName}},
                {config_updated, ConfigName, {Section, Key}}).
+
+
+initialize_app_confs() ->
+    case application:get_env(econfig, confs) of
+        undefined -> #state{};
+        {ok, Confs} -> initialize_app_confs1(Confs, #state{})
+    end.
+
+initialize_app_confs1([], State) ->
+    State;
+initialize_app_confs1([{ConfName, IniFiles} | Rest], State) ->
+    initialize_app_confs1([{ConfName, IniFiles, []} | Rest], State);
+initialize_app_confs1([{ConfName, IniFiles, Options} | Rest],
+                      #state{confs=Confs}=State) ->
+    WriteFile = parse_inis(ConfName, IniFiles),
+    Pid = case proplists:get_value(autoreload, Options) of
+        true ->
+            {ok, Pid0} =
+                        econfig_watcher_sup:start_watcher(ConfName,
+                                                          IniFiles),
+            Pid0;
+        _ ->
+            nil
+    end,
+    Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
+                                          pid=Pid,
+                                          options=Options,
+                                          inifiles=IniFiles},
+                        Confs),
+
+    initialize_app_confs1(Rest, State#state{confs=Confs1}).
+
 
 
 parse_inis(ConfName, IniFiles0) ->
