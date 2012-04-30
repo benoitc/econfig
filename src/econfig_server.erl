@@ -26,7 +26,7 @@
          code_change/3]).
 
 -record(state, {confs = dict:new()}).
--record(config, {write_file,
+-record(config, {write_file=nil,
                  pid=nil,
                  options,
                  inifiles}).
@@ -222,10 +222,13 @@ handle_call({stop_autoreload, ConfName}, _From, #state{confs=Confs}=State) ->
 
 handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
             #state{confs=Confs}=State) ->
+
     Result = case {Persist, dict:find(ConfName, Confs)} of
-        {true, {ok, #config{write_file=FileName}}} ->
+        {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
+            pause_autoreload(Conf),
             econfig_file_writer:save_to_file({{Section, Key}, Value},
-                                             FileName);
+                                             FileName),
+            restart_autoreload(Conf);
         _ ->
             ok
     end,
@@ -241,10 +244,16 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
 
 handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
             #state{confs=Confs}=State) ->
+
     true = ets:delete(?MODULE, {ConfName, Section, Key}),
+    notify_change(ConfName, Section, Key),
+
     case {Persist, dict:find(ConfName, Confs)} of
-        {true, {ok, #config{write_file=FileName}}} ->
-            econfig_file_writer:save_to_file({{Section, Key}, ""}, FileName);
+        {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
+            pause_autoreload(Conf),
+            econfig_file_writer:save_to_file({{Section, Key}, ""},
+                                             FileName),
+            restart_autoreload(Conf);
         _ ->
             ok
     end,
@@ -272,6 +281,17 @@ terminate(_Reason , _State) ->
 %% -----------------------------------------------
 %% internal functions
 %% -----------------------------------------------
+%%
+
+pause_autoreload(#config{pid=Pid}) when is_pid(Pid) ->
+    econfig_watcher:pause(Pid);
+pause_autoreload(_) ->
+    ok.
+
+restart_autoreload(#config{pid=Pid}) when is_pid(Pid) ->
+    econfig_watcher:restart(Pid);
+restart_autoreload(_) ->
+    ok.
 
 notify_change(ConfigName, Section, Key) ->
     gproc:send({p, l, {config_updated, ConfigName}},

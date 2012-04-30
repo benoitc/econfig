@@ -6,7 +6,8 @@
 -module(econfig_watcher).
 -behaviour(gen_server).
 
--export([start_link/2]).
+-export([start_link/2,
+         pause/1, restart/1]).
 
 -export([init/1,
          handle_call/3,
@@ -23,7 +24,14 @@
 -record(file, {path, last_mod}).
 
 start_link(ConfName, Paths) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [ConfName, Paths] , []).
+    gen_server:start_link(?MODULE, [ConfName, Paths] , []).
+
+
+pause(Pid) ->
+    gen_server:call(Pid, pause).
+
+restart(Pid) ->
+    gen_server:call(Pid, restart).
 
 init([ConfName, Paths]) ->
     Files = econfig_util:find_files(Paths, fun file_info/1),
@@ -33,6 +41,15 @@ init([ConfName, Paths]) ->
                          conf=ConfName,
                          paths=Paths},
     {ok, InitState}.
+
+
+handle_call(pause, _From, State=#watcher{tc=Tc}) when Tc /= nil ->
+    erlang:cancel_timer(Tc),
+    {reply, ok, State#watcher{tc=nil}};
+handle_call(restart, _From, State=#watcher{tc=nil, paths=Paths}) ->
+    Files = econfig_util:find_files(Paths, fun file_info/1),
+    Tc = erlang:start_timer(scan_delay(), self(), scan),
+    {reply, ok, State#watcher{tc=Tc, files=Files}};
 
 handle_call(_Req, _From, State) ->
     {reply, ok, State}.
