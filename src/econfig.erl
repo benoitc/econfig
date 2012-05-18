@@ -16,7 +16,8 @@
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
 
--type inifiles() :: [string()].
+-type inifile() :: string().
+-type inifiles() :: [inifile()].
 -type options() :: [autoreload].
 
 
