@@ -37,6 +37,8 @@ for last changes.
 
 ## Examples
 
+Quick usage example:
+
 
 ```
 1> application:start(gproc).

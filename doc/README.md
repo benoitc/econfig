@@ -22,7 +22,9 @@ manage changes from a full config directory.
 See the [NEWS](http://github.com/benoitc/econfig/blob/master/NEWS.md)
 for last changes.
 
-## Examples<pre>1> application:start(gproc).
+## Examples
+
+Quick usage example:<pre>1> application:start(gproc).
 ok
 2> application:start(econfig).
 ok
