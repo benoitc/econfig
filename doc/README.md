@@ -7,8 +7,7 @@ Copyright (c) 2012 Benoît Chesneau.
 
 __Version:__ 0.3
 
-econfig
-=======
+# econfig
 
 econfig is a simple Erlang config handler to manage a config from INI
 files.
@@ -23,8 +22,8 @@ manage changes from a full config directory.
 See the [NEWS](http://github.com/benoitc/econfig/blob/master/NEWS.md)
 for last changes.
 
-Examples
---------<pre>
+### Examples
+
 1> application:start(gproc).
 ok
 2> application:start(econfig).
@@ -35,19 +34,18 @@ ok
 true
 5> econfig:get_value(couchdb, "couchdb").
 [{"delayed_commits","true"},
- {"file_compression","snappy"},
- {"os_process_timeout","5000"},
- {"uri_file","./data/couch.uri"},
- {"index_dir","./data"},
- {"max_document_size","4294967296"},
- {"database_dir","./data"},
- {"max_dbs_open","100"}]
+{"file_compression","snappy"},
+{"os_process_timeout","5000"},
+{"uri_file","./data/couch.uri"},
+{"index_dir","./data"},
+{"max_document_size","4294967296"},
+{"database_dir","./data"},
+{"max_dbs_open","100"}]
 6> econfig:set_value(couchdb, "ssl", "test", "1").
 ok
 7> flush().
 Shell got {config_updated,couchdb,{set,{"ssl","test"}}}
 ok
-</pre>
 
 Contribute
 ----------

@@ -94,9 +94,12 @@ Configs can also be registererd in the app configuration at startup:
 [confs, [{ConfigName, IniFile},
 {ConfigName1, IniFiles1, [Options]}, ..]]
 
+
+
 Options:
-`autoreload`: auto reload the config on files or dirs changes
-`{autoreload, Delay}`: autoreload the config file or dir
+
+- `autoreload`: auto reload the config on files or dirs changes
+- `{autoreload, Delay}`: autoreload the config file or dir
 changes. Delay set the time between each scan. Default is 5000
 and can be set using the `scan_delay` application environement
 for econfig.<a name="reload-1"></a>
