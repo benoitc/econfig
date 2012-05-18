@@ -6,7 +6,7 @@
 -module(econfig_watcher).
 -behaviour(gen_server).
 
--export([start_link/2,
+-export([start_link/2, start_link/3,
          pause/1, restart/1]).
 
 -export([init/1,
@@ -18,13 +18,17 @@
 
 -record(watcher, {tc,
                   files = [],
+                  scan_delay,
                   conf,
                   paths}).
 
 -record(file, {path, last_mod}).
 
 start_link(ConfName, Paths) ->
-    gen_server:start_link(?MODULE, [ConfName, Paths] , []).
+    start_link(ConfName, Paths, scan_delay()).
+
+start_link(ConfName, Paths, Delay) ->
+    gen_server:start_link(?MODULE, [ConfName, Paths, Delay] , []).
 
 
 pause(Pid) ->
@@ -33,10 +37,11 @@ pause(Pid) ->
 restart(Pid) ->
     gen_server:call(Pid, restart).
 
-init([ConfName, Paths]) ->
+init([ConfName, Paths, Delay]) ->
     Files = econfig_util:find_files(Paths, fun file_info/1),
-    Tc = erlang:start_timer(scan_delay(), self(), scan),
+    Tc = erlang:start_timer(Delay, self(), scan),
     InitState = #watcher{tc=Tc,
+                         scan_delay=Delay,
                          files=Files,
                          conf=ConfName,
                          paths=Paths},
@@ -46,9 +51,10 @@ init([ConfName, Paths]) ->
 handle_call(pause, _From, State=#watcher{tc=Tc}) when Tc /= nil ->
     erlang:cancel_timer(Tc),
     {reply, ok, State#watcher{tc=nil}};
-handle_call(restart, _From, State=#watcher{tc=nil, paths=Paths}) ->
+handle_call(restart, _From, State=#watcher{tc=nil, scan_delay=Delay,
+                                           paths=Paths}) ->
     Files = econfig_util:find_files(Paths, fun file_info/1),
-    Tc = erlang:start_timer(scan_delay(), self(), scan),
+    Tc = erlang:start_timer(Delay, self(), scan),
     {reply, ok, State#watcher{tc=Tc, files=Files}};
 
 handle_call(_Req, _From, State) ->
@@ -58,8 +64,9 @@ handle_cast(_Event, State) ->
     {noreply, State}.
 
 
-handle_info({timeout, Tc, scan}, State=#watcher{tc=Tc, files=OldFiles,
-                                                conf=Conf, paths=Paths}) ->
+handle_info({timeout, Tc, scan}, State=#watcher{tc=Tc, scan_delay=Delay,
+                                                files=OldFiles, conf=Conf,
+                                                paths=Paths}) ->
     NewFiles = econfig_util:find_files(Paths, fun file_info/1),
     case OldFiles -- NewFiles of
         [] ->
@@ -68,8 +75,7 @@ handle_info({timeout, Tc, scan}, State=#watcher{tc=Tc, files=OldFiles,
             IniFiles = lists:map(fun(#file{path=P}) -> P end, NewFiles),
             econfig_server:reload(Conf, IniFiles)
     end,
-    {noreply, State#watcher{tc=erlang:start_timer(scan_delay(), self(),
-                                             scan),
+    {noreply, State#watcher{tc=erlang:start_timer(Delay, self(), scan),
                             files=NewFiles}};
 
 handle_info(_Info, State) ->
@@ -87,7 +93,7 @@ terminate(_Reason, _State) ->
 %%
 
 scan_delay() ->
-    case application:get_env(econfig, delay) of
+    case application:get_env(econfig, scan_delay) of
         undefined -> 5000;
         {ok, Delay} -> Delay
     end.

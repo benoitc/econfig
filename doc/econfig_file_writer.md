@@ -5,8 +5,6 @@
 * [Function Details](#functions)
 
 
-
-
 <a name="index"></a>
 
 ##Function Index##
@@ -24,12 +22,8 @@
 ###save_to_file/2##
 
 
-
-
 <pre>save_to_file(Config::{{Section::string(), Option::string()}, Value::string()}, File::<a href="#type-filename">filename()</a>) -> ok</pre>
 <br></br>
-
-
 
 
 Saves a Section/Key/Value triple to the ini file File::filename()

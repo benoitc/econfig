@@ -5,10 +5,6 @@
 * [Function Details](#functions)
 
 
-
-
-
-
 __Behaviours:__ [`gen_server`](gen_server.md).<a name="index"></a>
 
 ##Function Index##
@@ -26,17 +22,11 @@ __Behaviours:__ [`gen_server`](gen_server.md).<a name="index"></a>
 ###all/1##
 
 
-
-
 `all(ConfigName) -> any()`
-
-
 
 get all values of a configuration<a name="code_change-3"></a>
 
 ###code_change/3##
-
-
 
 
 `code_change(OldVsn, State, Extra) -> any()`
@@ -46,17 +36,11 @@ get all values of a configuration<a name="code_change-3"></a>
 ###delete_value/3##
 
 
-
-
 `delete_value(ConfigName, Section, Key) -> any()`
-
-
 
 delete a value<a name="delete_value-4"></a>
 
 ###delete_value/4##
-
-
 
 
 `delete_value(ConfigName, Section0, Key0, Persist) -> any()`
@@ -66,28 +50,18 @@ delete a value<a name="delete_value-4"></a>
 ###get_value/2##
 
 
-
-
 `get_value(ConfigName, Section0) -> any()`
-
-
 
 get values of a section<a name="get_value-3"></a>
 
 ###get_value/3##
 
 
-
-
 `get_value(ConfigName, Section, Key) -> any()`
-
-
 
 get value for a key in a section<a name="get_value-4"></a>
 
 ###get_value/4##
-
-
 
 
 `get_value(ConfigName, Section0, Key0, Default) -> any()`
@@ -97,15 +71,11 @@ get value for a key in a section<a name="get_value-4"></a>
 ###handle_call/3##
 
 
-
-
 `handle_call(Msg, From, State) -> any()`
 
 <a name="handle_cast-2"></a>
 
 ###handle_cast/2##
-
-
 
 
 `handle_cast(Msg, State) -> any()`
@@ -115,15 +85,11 @@ get value for a key in a section<a name="get_value-4"></a>
 ###handle_info/2##
 
 
-
-
 `handle_info(Info, State) -> any()`
 
 <a name="init-1"></a>
 
 ###init/1##
-
-
 
 
 `init(X1) -> any()`
@@ -133,19 +99,13 @@ get value for a key in a section<a name="get_value-4"></a>
 ###register_config/2##
 
 
-
-
 <pre>register_config(ConfigName::term(), IniFiles::<a href="econfig.md#type-inifiles">econfig:inifiles()</a>) -> ok | {error, any()}</pre>
 <br></br>
-
-
 
 
 register inifiles<a name="register_config-3"></a>
 
 ###register_config/3##
-
-
 
 
 `register_config(ConfigName, IniFiles, Options) -> any()`
@@ -155,39 +115,25 @@ register inifiles<a name="register_config-3"></a>
 ###reload/1##
 
 
-
-
 `reload(ConfigName) -> any()`
-
-
 
 reload the configuration<a name="reload-2"></a>
 
 ###reload/2##
 
 
-
-
 `reload(ConfigName, IniFiles) -> any()`
-
-
 
 reload the configuration<a name="set_value-4"></a>
 
 ###set_value/4##
 
 
-
-
 `set_value(ConfigName, Section, Key, Value) -> any()`
-
-
 
 set a value<a name="set_value-5"></a>
 
 ###set_value/5##
-
-
 
 
 `set_value(ConfigName, Section0, Key0, Value0, Persist) -> any()`
@@ -197,15 +143,11 @@ set a value<a name="set_value-5"></a>
 ###start_autoreload/1##
 
 
-
-
 `start_autoreload(ConfigName) -> any()`
 
 <a name="start_link-0"></a>
 
 ###start_link/0##
-
-
 
 
 `start_link() -> any()`
@@ -215,8 +157,6 @@ set a value<a name="set_value-5"></a>
 ###stop_autoreload/1##
 
 
-
-
 `stop_autoreload(ConfigName) -> any()`
 
 <a name="subscribe-1"></a>
@@ -224,11 +164,7 @@ set a value<a name="set_value-5"></a>
 ###subscribe/1##
 
 
-
-
 `subscribe(ConfigName) -> any()`
-
-
 
 
 
@@ -244,8 +180,6 @@ The message received to each subscriber will be of the form:
 ###terminate/2##
 
 
-
-
 `terminate(Reason, State) -> any()`
 
 <a name="unregister_config-1"></a>
@@ -253,21 +187,13 @@ The message received to each subscriber will be of the form:
 ###unregister_config/1##
 
 
-
-
 `unregister_config(ConfigName) -> any()`
-
-
 
 unregister a conf<a name="unsubscribe-1"></a>
 
 ###unsubscribe/1##
 
 
-
-
 `unsubscribe(ConfigName) -> any()`
-
-
 
 Remove subscribtion created using `subscribe(ConfigName)`

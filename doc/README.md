@@ -7,38 +7,24 @@ Copyright (c) 2012 Benoît Chesneau.
 
 __Version:__ 0.2
 
-
-
 econfig
 =======
 
-
-
 econfig is a simple Erlang config handler to manage a config from INI
 files.
-
-
 
 econfig can be use to read and update INI files. Values are cached in an
 ETS table and you can manage multiple configuration profile. A process
 can also subscribe to config updates events.
 
-
-
 Autoreload of the config when an INI file is updated is supported, you can even
 manage changes from a full config directory.
-
-
 
 See the [NEWS](http://github.com/benoitc/econfig/blob/master/NEWS.md)
 for last changes.
 
-
-
 Examples
---------
-
-<pre>
+--------<pre>
 1> application:start(gproc).
 ok
 2> application:start(econfig).
@@ -59,18 +45,13 @@ true
 6> econfig:set_value(couchdb, "ssl", "test", "1").
 ok
 7> flush().
-Shell got {config_updated,couchdb,{"ssl","test"}}
+Shell got {config_updated,couchdb,{set,{"ssl","test"}}}
 ok
 </pre>
 
-
-
-
 Contribute
 ----------
-For issues, comments or feedback please [create an issue!] [1]
-
-[1]: http://github.com/benoitc/econfig/issues "econfig issues"
+For issues, comments or feedback please [create an issue!] [1][1]: http://github.com/benoitc/econfig/issues "econfig issues"
 
 
 ##Modules##

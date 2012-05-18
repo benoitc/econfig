@@ -34,9 +34,14 @@ register_config(ConfigName, IniFiles) ->
 %% Configs can also be registererd in the app configuration at startup:
 %%
 %%      [confs, [{ConfigName, IniFile},
-%%               {ConfigName1, IniFiles1, Options}, ..]]
+%%               {ConfigName1, IniFiles1, [Options]}, ..]]
 %%
-%%
+%% Options:
+%%      `autoreload': auto reload the config on files or dirs changes
+%%      `{autoreload, Delay}': autoreload the config file or dir
+%%      changes. Delay set the time between each scan. Default is 5000
+%%      and can be set using the `scan_delay' application environement
+%%      for econfig.
 register_config(ConfigName, IniFiles, Options) ->
     econfig_server:register_config(ConfigName, IniFiles, Options).
 

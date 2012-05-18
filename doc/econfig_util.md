@@ -5,8 +5,6 @@
 * [Function Details](#functions)
 
 
-
-
 <a name="index"></a>
 
 ##Function Index##
@@ -24,15 +22,11 @@
 ###abs_pathname/1##
 
 
-
-
 `abs_pathname(Filename) -> any()`
 
 <a name="find_files-1"></a>
 
 ###find_files/1##
-
-
 
 
 `find_files(Paths) -> any()`
@@ -42,15 +36,11 @@
 ###find_files/2##
 
 
-
-
 `find_files(Paths, Fun) -> any()`
 
 <a name="find_files-3"></a>
 
 ###find_files/3##
-
-
 
 
 `find_files(Rest, Acc, Fun) -> any()`
@@ -60,8 +50,6 @@
 ###find_ini_files/1##
 
 
-
-
 `find_ini_files(Path) -> any()`
 
 <a name="implode-2"></a>
@@ -69,15 +57,11 @@
 ###implode/2##
 
 
-
-
 `implode(List, Sep) -> any()`
 
 <a name="to_list-1"></a>
 
 ###to_list/1##
-
-
 
 
 `to_list(V) -> any()`

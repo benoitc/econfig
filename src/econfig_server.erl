@@ -151,6 +151,12 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
                                 econfig_watcher_sup:start_watcher(ConfName,
                                                                   IniFiles),
                     Pid0;
+                Delay when is_integer(Delay) ->
+                    {ok, Pid0} =
+                                econfig_watcher_sup:start_watcher(ConfName,
+                                                                  IniFiles,
+                                                                  Delay),
+                    Pid0;
                 _ ->
                     nil
             end,
