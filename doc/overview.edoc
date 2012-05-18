@@ -60,7 +60,7 @@ true
 6> econfig:set_value(couchdb, "ssl", "test", "1").
 ok
 7> flush().
-Shell got {config_updated,couchdb,{"ssl","test"}}
+Shell got {config_updated,couchdb,{set,{"ssl","test"}}}
 ok
 </pre>
 

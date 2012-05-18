@@ -193,7 +193,7 @@ handle_call({reload, {ConfName, IniFiles0}}, _From,
                                                       options=Options,
                                                       inifiles=IniFiles},
                                 Confs),
-
+            notify_change(ConfName, reload),
             {reply, ok, State#state{confs=Confs1}};
         _ ->
             {reply, ok, State}
@@ -239,7 +239,7 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
         ok ->
             true = ets:insert(?MODULE, {{ConfName, Section, Key},
                                         Value}),
-            notify_change(ConfName, Section, Key),
+            notify_change(ConfName, set, Section, Key),
             {reply, ok, State};
         _Error ->
             {reply, Result, State}
@@ -259,7 +259,7 @@ handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
         _ ->
             ok
     end,
-    notify_change(ConfName, Section, Key),
+    notify_change(ConfName, delete, Section, Key),
     {reply, ok, State};
 
 handle_call(_Msg, _From, State) ->
@@ -295,9 +295,14 @@ restart_autoreload(#config{pid=Pid}) when is_pid(Pid) ->
 restart_autoreload(_) ->
     ok.
 
-notify_change(ConfigName, Section, Key) ->
+
+notify_change(ConfigName, Type) ->
     gproc:send({p, l, {config_updated, ConfigName}},
-               {config_updated, ConfigName, {Section, Key}}).
+               {config_updated, ConfigName, Type}).
+
+notify_change(ConfigName, Type, Section, Key) ->
+    gproc:send({p, l, {config_updated, ConfigName}},
+               {config_updated, ConfigName, {Type, {Section, Key}}}).
 
 
 initialize_app_confs() ->
