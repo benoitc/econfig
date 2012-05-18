@@ -7,8 +7,7 @@ Copyright (c) 2012 Benoît Chesneau.
 
 __Version:__ 0.3
 
-econfig
-=======
+# econfig
 
 econfig is a simple Erlang config handler to manage a config from INI
 files.
@@ -23,8 +22,7 @@ manage changes from a full config directory.
 See the [NEWS](http://github.com/benoitc/econfig/blob/master/NEWS.md)
 for last changes.
 
-Examples
---------<pre>1> application:start(gproc).
+## Examples<pre>1> application:start(gproc).
 ok
 2> application:start(econfig).
 ok
