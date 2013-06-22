@@ -11,7 +11,8 @@
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
          start_autoreload/1, stop_autoreload/1,
-         all/1, sections/1, prefix/2, cfg2list/1,
+         all/1, sections/1, prefix/2,
+         cfg2list/1, cfg2list/2,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
@@ -117,6 +118,41 @@ cfg2list(ConfigName) ->
                     {Section, KVs} ->
                         KVs1 = lists:keymerge(1, KVs, [{Key, Value}]),
                         lists:keyreplace(Section, 1, Props, {Section, KVs1})
+                end
+        end, [], Matches).
+
+%% @doc retrieve config as a proplist
+cfg2list(ConfigName, GroupKey) ->
+    Matches = ets:match(?MODULE, {{ConfigName, '$1', '$2'}, '$3'}),
+    lists:foldl(fun([Section, Key, Value], Props) ->
+                case re:split(Section, GroupKey, [{return,list}]) of
+                    [Section] ->
+                        case lists:keyfind(Section, 1, Props) of
+                            false ->
+                                [{Section, [{Key, Value}]} | Props];
+                            {Section, KVs} ->
+                                KVs1 = lists:keymerge(1, KVs, [{Key, Value}]),
+                                lists:keyreplace(Section, 1, Props, {Section, KVs1})
+                        end;
+                    [Section1, SSection] ->
+                        case lists:keyfind(Section1, 1, Props) of
+                            false ->
+                                [{Section1, [{SSection, [{Key, Value}]}]}
+                                 | Props];
+                            {Section1, KVs} ->
+                                KVs1 = case lists:keyfind(SSection, 1, KVs) of
+                                    false ->
+                                        [{SSection, [{Key, Value}]} | KVs];
+                                    {SSection, SKVs} ->
+                                        SKVs1 = lists:keymerge(1, SKVs,
+                                                               [{Key, Value}]),
+                                        lists:keyreplace(SSection, 1,
+                                                         KVs, {SSection,
+                                                               SKVs1})
+                                end,
+                                lists:keyreplace(Section1, 1, Props,
+                                                 {Section1, KVs1})
+                        end
                 end
         end, [], Matches).
 

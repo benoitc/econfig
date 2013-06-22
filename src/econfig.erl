@@ -13,7 +13,8 @@
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
          start_autoreload/1, stop_autoreload/1,
-         all/1, sections/1, prefix/2, cfg2list/1,
+         all/1, sections/1, prefix/2,
+         cfg2list/1, cfg2list/2,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
@@ -112,6 +113,10 @@ prefix(ConfigName, Prefix) ->
 %% @doc retrive config as a proplist
 cfg2list(ConfigName) ->
     econfig_server:cfg2list(ConfigName).
+
+%% @doc retrieve config as a proplist
+cfg2list(ConfigName, GroupKey) ->
+    econfig_server:cfg2list(ConfigName, GroupKey).
 
 %% @doc get values of a section
 get_value(ConfigName, Section) ->
