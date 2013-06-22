@@ -7,6 +7,7 @@
 -behaviour(gen_server).
 
 -export([register_config/2, register_config/3,
+         open_config/2, open_config/3,
          unregister_config/1,
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
@@ -49,6 +50,25 @@ register_config(ConfigName, IniFiles, Options) ->
 %% @doc unregister a conf
 unregister_config(ConfigName) ->
     gen_server:call(?MODULE, {unregister_conf, ConfigName}).
+
+%% @doc open or create an ini file an register it
+open_config(ConfigName, IniFile) ->
+    open_config(ConfigName, IniFile, []).
+
+open_config(ConfigName, IniFile, Options) ->
+    IniFileName = econfig_util:abs_pathname(IniFile),
+    case filelib:is_file(IniFileName) of
+        true ->
+            register_config(ConfigName, [IniFile], Options);
+        false ->
+            case file:open(IniFileName, [write]) of
+                {ok, Fd} ->
+                    file:close(Fd),
+                    register_config(ConfigName, [IniFile], Options);
+                Error ->
+                    Error
+            end
+    end.
 
 %% @doc Subscribe to config events for a config named `ConfigName'
 %%

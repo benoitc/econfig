@@ -9,6 +9,7 @@
 -export([start/0, stop/0]).
 
 -export([register_config/2, register_config/3,
+         open_config/2, open_config/3,
          unregister_config/1,
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
@@ -66,6 +67,14 @@ register_config(ConfigName, IniFiles, Options) ->
 unregister_config(ConfigName) ->
     econfig_server:unregister_config(ConfigName).
 
+%% @doc open or create an ini file an register it
+open_config(ConfigName, IniFile) ->
+    econfig_server:open_config(ConfigName, IniFile).
+
+%% @doc open or create an ini file an register it. See the
+%% register_config function for a list of available functions.
+open_config(ConfigName, IniFile, Options) ->
+    econfig_server:open_config(ConfigName, IniFile, Options).
 
 %% @doc Subscribe to config events for a config named `ConfigName'
 %%
