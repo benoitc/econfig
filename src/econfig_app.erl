@@ -9,37 +9,32 @@
 
 %% Application callbacks
 -export([start/2, stop/1]).
+-export([ensure_deps_started/0]).
 
 %% ===================================================================
 %% Application callbacks
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    start_app_deps(econfig),
+    econfig_deps:ensure(),
+    ensure_deps_started(),
     econfig_sup:start_link().
 
 stop(_State) ->
     ok.
 
 
-%% @spec start_app_deps(App :: atom()) -> ok
-%% @doc Start depedent applications of App.
-start_app_deps(App) ->
-    {ok, DepApps} = application:get_key(App, applications),
-    [ensure_started(A) || A <- DepApps],
-    ok.
+ensure_deps_started() ->
+    {ok, Deps} = application:get_key(econfig, applications),
+    true = lists:all(fun ensure_started/1, Deps).
 
-%% @spec ensure_started(Application :: atom()) -> ok
-%% @doc Start the named application if not already started.
 ensure_started(App) ->
     case application:start(App) of
-	ok ->
-	    ok;
-	{error, {already_started, App}} ->
-	    ok;
-    Else ->
-        error_logger:error_msg("Couldn't start ~p: ~p", [App, Else]),
-        Else
+        ok ->
+            true;
+        {error, {already_started, App}} ->
+            true;
+        Else ->
+            error_logger:error_msg("Couldn't start ~p: ~p", [App, Else]),
+            Else
     end.
-
-

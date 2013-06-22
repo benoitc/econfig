@@ -6,6 +6,8 @@
 %% @doc Public API of econfig.
 -module(econfig).
 
+-export([start/0, stop/0]).
+
 -export([register_config/2, register_config/3,
          unregister_config/1,
          subscribe/1, unsubscribe/1,
@@ -19,6 +21,17 @@
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
 -type options() :: [autoreload].
+
+%% @doc Start the couchbeam process. Useful when testing using the shell.
+start() ->
+    econfig_deps:ensure(),
+    application:load(econfig),
+    econfig_app:ensure_deps_started(),
+    application:start(econfig).
+
+%% @doc Stop the couchbeam process. Useful when testing using the shell.
+stop() ->
+    application:stop(econfig).
 
 
 -spec register_config(term(), econfig:inifiles()) -> ok | {error,
