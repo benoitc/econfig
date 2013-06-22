@@ -14,6 +14,7 @@
          reload/1, reload/2,
          start_autoreload/1, stop_autoreload/1,
          all/1,
+         sections/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
@@ -100,6 +101,10 @@ stop_autoreload(ConfigName) ->
 %% @doc get all values of a configuration
 all(ConfigName) ->
     econfig_server:all(ConfigName).
+
+%% @doc get all sections of a configuration
+sections(ConfigName) ->
+    econfig_server:sections(ConfigName).
 
 %% @doc get values of a section
 get_value(ConfigName, Section) ->

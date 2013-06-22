@@ -12,6 +12,7 @@
          reload/1, reload/2,
          start_autoreload/1, stop_autoreload/1,
          all/1,
+         sections/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
@@ -85,6 +86,11 @@ stop_autoreload(ConfigName) ->
 all(ConfigName) ->
     Matches = ets:match(?MODULE, {{ConfigName, '$1', '$2'}, '$3'}),
     [{Section, Key, Value} || [Section, Key, Value] <- Matches].
+
+%% @doc get all sections of a configuration
+sections(ConfigName) ->
+    Matches = ets:match(?MODULE, {{ConfigName, '$1', '_'}, '_'}),
+    lists:umerge(Matches).
 
 %% @doc get values of a section
 get_value(ConfigName, Section0) ->
