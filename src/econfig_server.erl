@@ -11,7 +11,7 @@
          subscribe/1, unsubscribe/1,
          reload/1, reload/2,
          start_autoreload/1, stop_autoreload/1,
-         all/1, sections/1, prefix/2,
+         all/1, sections/1, prefix/2, cfg2list/1,
          get_value/2, get_value/3, get_value/4,
          set_value/4, set_value/5,
          delete_value/3, delete_value/4]).
@@ -106,6 +106,19 @@ prefix(ConfigName, Prefix) ->
                     end
             end, [], Matches),
     lists:reverse(Found).
+
+%% @doc retrive config as a proplist
+cfg2list(ConfigName) ->
+    Matches = ets:match(?MODULE, {{ConfigName, '$1', '$2'}, '$3'}),
+    lists:foldl(fun([Section, Key, Value], Props) ->
+                case lists:keyfind(Section, 1, Props) of
+                    false ->
+                        [{Section, [{Key, Value}]} | Props];
+                    {Section, KVs} ->
+                        KVs1 = lists:keymerge(1, KVs, [{Key, Value}]),
+                        lists:keyreplace(Section, 1, Props, {Section, KVs1})
+                end
+        end, [], Matches).
 
 %% @doc get values of a section
 get_value(ConfigName, Section0) ->
