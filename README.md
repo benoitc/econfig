@@ -12,7 +12,7 @@ econfig is a simple Erlang config handler to manage a config from INI
 files.
 
 econfig can be use to read and update INI files. Values are cached in an
-ETS table and you can manage multiple configuration profile. A process
+ETS table and you can manage multiple configuration profiles. A process
 can also subscribe to config updates events.
 
 Autoreload of the config when an INI file is updated is supported, you can even
