@@ -1,7 +1,6 @@
 
 
-#econfig - simple Erlang config handler using INI files#
-
+# econfig - simple Erlang config handler using INI files #
 
 Copyright (c) 2012 Benoît Chesneau.
 
@@ -24,7 +23,10 @@ for last changes.
 
 ## Examples
 
-Quick usage example:<pre>1> application:start(gproc).
+Quick usage example:
+
+```
+1> application:start(gproc).
 ok
 2> application:start(econfig).
 ok
@@ -45,19 +47,22 @@ true
 ok
 7> flush().
 Shell got {config_updated,couchdb,{set,{"ssl","test"}}}
-ok</pre>
+ok
+```
 
 Contribute
 ----------
-For issues, comments or feedback please [create an issue!] [1][1]: http://github.com/benoitc/econfig/issues "econfig issues"
+For issues, comments or feedback please [create an issue!] [1]
+[1]: http://github.com/benoitc/econfig/issues "econfig issues"
 
 
-##Modules##
+## Modules ##
 
 
 <table width="100%" border="0" summary="list of modules">
 <tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig.md" class="module">econfig</a></td></tr>
 <tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_app.md" class="module">econfig_app</a></td></tr>
+<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_deps.md" class="module">econfig_deps</a></td></tr>
 <tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_file_writer.md" class="module">econfig_file_writer</a></td></tr>
 <tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_server.md" class="module">econfig_server</a></td></tr>
 <tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_sup.md" class="module">econfig_sup</a></td></tr>
