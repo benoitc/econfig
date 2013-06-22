@@ -4,7 +4,7 @@
 {application, econfig,
  [
   {description, "simple Erlang config handler using INI files"},
-  {vsn, "0.3"},
+  {vsn, "0.4"},
   {registered, []},
   {applications, [kernel,
                   stdlib,
