@@ -15,8 +15,8 @@
          all/1, sections/1, prefix/2,
          cfg2list/1, cfg2list/2,
          get_value/2, get_value/3, get_value/4,
-         set_value/4, set_value/5,
-         delete_value/3, delete_value/4]).
+         set_value/3, set_value/4, set_value/5,
+         delete_value/2, delete_value/3, delete_value/4]).
 
 -export([start_link/0]).
 
@@ -195,6 +195,18 @@ get_value(ConfigName, Section0, Key0, Default) ->
         [{_, Match}] -> Match
     end.
 
+%% @doc set a section
+set_value(ConfigName, Section, List) ->
+    set_value(ConfigName, Section, List, true).
+
+set_value(ConfigName, Section0, List, Persist)
+        when is_boolean(Persist) ->
+    Section = econfig_util:to_list(Section0),
+    List1 = [{econfig_util:to_list(K), econfig_util:to_list(V)}
+              || {K, V} <- List],
+    gen_server:call(?MODULE, {mset, {ConfigName, Section, List1,
+                                     Persist}}, infinity);
+
 %% @doc set a value
 set_value(ConfigName, Section, Key, Value) ->
     set_value(ConfigName, Section, Key, Value, true).
@@ -207,6 +219,14 @@ set_value(ConfigName, Section0, Key0, Value0, Persist) ->
     gen_server:call(?MODULE, {set, {ConfigName, Section, Key, Value,
                                     Persist}}, infinity).
 
+delete_value(ConfigName, Section) ->
+    delete_value(ConfigName, Section, true).
+
+delete_value(ConfigName, Section0, Persist) when is_boolean(Persist) ->
+    Section = econfig_util:to_list(Section0),
+    gen_server:call(?MODULE, {mdel, {ConfigName, Section, Persist}},
+                    infinity);
+
 %% @doc delete a value
 delete_value(ConfigName, Section, Key) ->
     delete_value(ConfigName, Section, Key, true).
@@ -215,8 +235,8 @@ delete_value(ConfigName, Section0, Key0, Persist) ->
     Section = econfig_util:to_list(Section0),
     Key = econfig_util:to_list(Key0),
 
-    gen_server:call(?MODULE, {delete, {ConfigName, Section, Key,
-                                       Persist}}, infinity).
+    gen_server:call(?MODULE, {del, {ConfigName, Section, Key,
+                                    Persist}}, infinity).
 
 
 
@@ -325,7 +345,7 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
     Result = case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
             pause_autoreload(Conf),
-            econfig_file_writer:save_to_file({{Section, Key}, Value},
+            econfig_file_writer:save_to_file({Section, [{Key, Value}]},
                                              FileName),
             restart_autoreload(Conf);
         _ ->
@@ -340,8 +360,29 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
         _Error ->
             {reply, Result, State}
     end;
+handle_call({mset, {ConfName, Section, List, Persist}}, _From,
+            #state{confs=Confs}=State) ->
+    Result = case {Persist, dict:find(ConfName, Confs)} of
+        {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
+            pause_autoreload(Conf),
+            econfig_file_writer:save_to_file({Section, List}, FileName),
+            restart_autoreload(Conf);
+        _ ->
+            ok
+    end,
+    case Result of
+        ok ->
+            lists:foreach(fun({Key,Value}) ->
+                        true = ets:insert(?MODULE, {{ConfName, Section,
+                                                     Key},Value})
+                end, List),
+            notify_change(ConfName, set, Section),
+            {reply, ok, State};
+        _Error ->
+            {reply, Result, State}
+    end;
 
-handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
+handle_call({del, {ConfName, Section, Key, Persist}}, _From,
             #state{confs=Confs}=State) ->
 
     true = ets:delete(?MODULE, {ConfName, Section, Key}),
@@ -349,13 +390,33 @@ handle_call({delete, {ConfName, Section, Key, Persist}}, _From,
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
             pause_autoreload(Conf),
-            econfig_file_writer:save_to_file({{Section, Key}, ""},
+            econfig_file_writer:save_to_file({Section, [{Key, ""}]},
                                              FileName),
             restart_autoreload(Conf);
         _ ->
             ok
     end,
     notify_change(ConfName, delete, Section, Key),
+    {reply, ok, State};
+handle_call({mdel, {ConfName, Section, Persist}}, _From,
+            #state{confs=Confs}=State) ->
+    Matches = ets:match(?MODULE, {{ConfName, Section, '$1'}, '$2'}),
+    ToDelete = lists:foldl(fun([Key, _Val], Acc) ->
+
+                    true = ets:delete(?MODULE, {ConfName, Section,
+                                                Key}),
+                    [{Key, ""} | Acc]
+            end, [], Matches),
+
+    case {Persist, dict:find(ConfName, Confs)} of
+        {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
+            pause_autoreload(Conf),
+            econfig_file_writer:save_to_file({Section, ToDelete}, FileName),
+            restart_autoreload(Conf);
+        _ ->
+            ok
+    end,
+    notify_change(ConfName, delete, Section),
     {reply, ok, State};
 
 handle_call(_Msg, _From, State) ->
@@ -395,6 +456,10 @@ restart_autoreload(_) ->
 notify_change(ConfigName, Type) ->
     gproc:send({p, l, {config_updated, ConfigName}},
                {config_updated, ConfigName, Type}).
+
+notify_change(ConfigName, Type, Section) ->
+    gproc:send({p, l, {config_updated, ConfigName}},
+               {config_updated, ConfigName, {Type, Section}}).
 
 notify_change(ConfigName, Type, Section, Key) ->
     gproc:send({p, l, {config_updated, ConfigName}},

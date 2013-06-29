@@ -17,8 +17,8 @@
          all/1, sections/1, prefix/2,
          cfg2list/1, cfg2list/2,
          get_value/2, get_value/3, get_value/4,
-         set_value/4, set_value/5,
-         delete_value/3, delete_value/4]).
+         set_value/3, set_value/4, set_value/5,
+         delete_value/2, delete_value/3, delete_value/4]).
 
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
@@ -139,11 +139,19 @@ get_value(ConfigName, Section, Key, Default) ->
     econfig_server:get_value(ConfigName, Section, Key, Default).
 
 %% @doc set a value
+set_value(ConfigName, Section, Value) ->
+    econfig_server:set_value(ConfigName, Section, Value).
+
+%% @doc set a value
 set_value(ConfigName, Section, Key, Value) ->
     econfig_server:set_value(ConfigName, Section, Key, Value).
 
 set_value(ConfigName, Section, Key, Value, Persist) ->
     econfig_server:set_value(ConfigName, Section, Key, Value, Persist).
+
+%% @doc delete a value
+delete_value(ConfigName, Section) ->
+    econfig_server:delete_value(ConfigName, Section).
 
 %% @doc delete a value
 delete_value(ConfigName, Section, Key) ->
