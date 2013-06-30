@@ -5,7 +5,7 @@
 
 - add `econfig:set_value/3`: function to fill a complete section with a
   proplists.
-- add `delete:set_value/2`: function to delete all the keys in a
+- add `econfig:delete_value/2`: function to delete all the keys in a
   section.
 
 0.4 - 2013-06-22
