@@ -10,7 +10,7 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td></td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr><tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td></td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td></td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#sections-1">sections/1</a></td><td>get all sections of a configuration.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td>set a value.</td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td></td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td></td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td></td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td></td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr><tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr><tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td></td></tr><tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td></td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td></td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#sections-1">sections/1</a></td><td>get all sections of a configuration.</td></tr><tr><td valign="top"><a href="#set_value-3">set_value/3</a></td><td>set a section.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td></td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
 
 
 <a name="functions"></a>
@@ -45,13 +45,20 @@ retrieve config as a proplist
 `code_change(OldVsn, State, Extra) -> any()`
 
 
+<a name="delete_value-2"></a>
+
+### delete_value/2 ###
+
+`delete_value(ConfigName, Section) -> any()`
+
+
 <a name="delete_value-3"></a>
 
 ### delete_value/3 ###
 
-`delete_value(ConfigName, Section, Key) -> any()`
+`delete_value(ConfigName, Section0, Persist) -> any()`
 
-delete a value
+
 <a name="delete_value-4"></a>
 
 ### delete_value/4 ###
@@ -170,13 +177,20 @@ reload the configuration
 `sections(ConfigName) -> any()`
 
 get all sections of a configuration
+<a name="set_value-3"></a>
+
+### set_value/3 ###
+
+`set_value(ConfigName, Section, List) -> any()`
+
+set a section
 <a name="set_value-4"></a>
 
 ### set_value/4 ###
 
-`set_value(ConfigName, Section, Key, Value) -> any()`
+`set_value(ConfigName, Section0, List, Persist) -> any()`
 
-set a value
+
 <a name="set_value-5"></a>
 
 ### set_value/5 ###
