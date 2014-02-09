@@ -9,7 +9,8 @@
          find_files/1, find_files/2, find_files/3,
          implode/2,
          abs_pathname/1,
-         to_list/1]).
+         to_list/1,
+         trim_whitespace/1]).
 
 
 find_ini_files(Path) ->
@@ -110,3 +111,8 @@ separate_cmd_args(" " ++ Rest, CmdAcc) ->
     {lists:reverse(CmdAcc), " " ++ Rest};
 separate_cmd_args([Char|Rest], CmdAcc) ->
     separate_cmd_args(Rest, [Char | CmdAcc]).
+
+trim_whitespace(Value) ->
+    re:replace(
+        re:replace(Value, "^[\s\t]+", "", [{return, list}, global]),
+        "[\s\t]+$", "", [{return, list}, global]).
