@@ -53,7 +53,7 @@ implode([H|T], Sep, Acc) ->
 % given a pathname "../foo/bar/" it gives back the fully qualified
 % absolute pathname.
 abs_pathname(" " ++ Filename) ->
-    % strip leading whitspace
+    % strip leading whitespace
     abs_pathname(Filename);
 abs_pathname([$/ |_]=Filename) ->
     Filename;
@@ -86,6 +86,12 @@ to_list(V) when is_integer(V) ->
 to_list(V) ->
     lists:flatten(io_lib:format("~p", [V])).
 
+%% @doc trims whitespace
+trim_whitespace(Value) ->
+    re:replace(
+        re:replace(Value, "^[\s\t]+", "", [{return, list}, global]),
+        "[\s\t]+$", "", [{return, list}, global]).
+
 %% --
 %% private functions
 %%
@@ -112,7 +118,3 @@ separate_cmd_args(" " ++ Rest, CmdAcc) ->
 separate_cmd_args([Char|Rest], CmdAcc) ->
     separate_cmd_args(Rest, [Char | CmdAcc]).
 
-trim_whitespace(Value) ->
-    re:replace(
-        re:replace(Value, "^[\s\t]+", "", [{return, list}, global]),
-        "[\s\t]+$", "", [{return, list}, global]).
