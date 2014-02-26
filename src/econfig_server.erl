@@ -572,7 +572,8 @@ parse_ini_file(ConfName, IniFile) ->
                             {AccSectionName, AccValues};
                         [LineValue | _Rest] ->
                             {AccSectionName,
-                             [{{ConfName, AccSectionName, ValueName}, LineValue}
+                             [{{ConfName, AccSectionName, ValueName},
+                               econfig_util:trim_whitespace(LineValue)}
                               | AccValues]}
                         end
                 end
