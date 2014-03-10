@@ -19,6 +19,9 @@ build: deps
 deps:
 	$(REBAR) get-deps
 
+test:
+	$(REBAR) skip_deps=true eunit
+
 # development
 #
 devclean:
@@ -31,4 +34,4 @@ devdeps:
 	$(REBAR) -C rebar_dev.config get-deps
 
 
-.PHONY: doc deps
+.PHONY: doc deps test
