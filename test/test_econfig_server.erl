@@ -2,18 +2,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 setup() ->
-    ok = application:load({application, econfig,
-      [
-        {description, "simple Erlang config handler using INI files"},
-        {vsn, "0.4.1"},
-        {registered, []},
-        {applications, [kernel,
-                        stdlib,
-                        gproc]},
-        {mod, { econfig_app, []}},
-        {env, []}
-      ]}),
-    % ok = application:load(econfig),
+    ok = application:load(econfig),
     ok = econfig:start(),
     ok = econfig:register_config(t, ["../priv/fixtures/test.ini"], []).
 

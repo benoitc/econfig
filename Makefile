@@ -19,7 +19,7 @@ build: deps
 deps:
 	$(REBAR) get-deps
 
-test:
+test: build
 	$(REBAR) skip_deps=true eunit
 
 # development
