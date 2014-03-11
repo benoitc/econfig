@@ -2,7 +2,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 setup() ->
-    application:load({application, econfig,
+    ok = application:load({application, econfig,
       [
         {description, "simple Erlang config handler using INI files"},
         {vsn, "0.4.1"},
@@ -14,14 +14,12 @@ setup() ->
         {env, []}
       ]}),
     % ok = application:load(econfig),
-    econfig:start(),
-    econfig:register_config(t, ["../priv/fixtures/test.ini"], []),
-    ok.
+    ok = econfig:start(),
+    ok = econfig:register_config(t, ["../priv/fixtures/test.ini"], []).
 
 cleanup(_State) ->
-    application:stop(econfig),
-    application:stop(gproc),
-    ok.
+    ok = application:stop(econfig),
+    ok = application:stop(gproc).
 
 simple_test_() ->
     {setup,
