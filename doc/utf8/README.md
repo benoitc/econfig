@@ -60,13 +60,13 @@ For issues, comments or feedback please [create an issue!] [1]
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig.md" class="module">econfig</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_app.md" class="module">econfig_app</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_deps.md" class="module">econfig_deps</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_file_writer.md" class="module">econfig_file_writer</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_server.md" class="module">econfig_server</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_sup.md" class="module">econfig_sup</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_util.md" class="module">econfig_util</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_watcher.md" class="module">econfig_watcher</a></td></tr>
-<tr><td><a href="http://github.com/benoitc/econfig/blob/master/doc/econfig_watcher_sup.md" class="module">econfig_watcher_sup</a></td></tr></table>
+<tr><td><a href="econfig.md" class="module">econfig</a></td></tr>
+<tr><td><a href="econfig_app.md" class="module">econfig_app</a></td></tr>
+<tr><td><a href="econfig_deps.md" class="module">econfig_deps</a></td></tr>
+<tr><td><a href="econfig_file_writer.md" class="module">econfig_file_writer</a></td></tr>
+<tr><td><a href="econfig_server.md" class="module">econfig_server</a></td></tr>
+<tr><td><a href="econfig_sup.md" class="module">econfig_sup</a></td></tr>
+<tr><td><a href="econfig_util.md" class="module">econfig_util</a></td></tr>
+<tr><td><a href="econfig_watcher.md" class="module">econfig_watcher</a></td></tr>
+<tr><td><a href="econfig_watcher_sup.md" class="module">econfig_watcher_sup</a></td></tr></table>
 
