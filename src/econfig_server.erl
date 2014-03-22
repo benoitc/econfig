@@ -553,7 +553,8 @@ parse_ini_file(ConfName, IniFile) ->
                             {AccSectionName, AccValues};
                         [LineValue | _Rest] ->
                             E = {{AccSectionName, ValueName},
-                                PrevValue ++ " " ++ LineValue},
+                                 PrevValue ++ " " ++
+                                 econfig_util:trim_whitespace(LineValue)},
                             {AccSectionName, [E | AccValuesRest]}
                         end;
                     _ ->
@@ -562,17 +563,19 @@ parse_ini_file(ConfName, IniFile) ->
                 [""|_LineValues] -> % line begins with "=", ignore
                     {AccSectionName, AccValues};
                 [ValueName|LineValues] -> % yeehaw, got a line!
+                    %% replace all tabs by an empty value.
+                    ValueName1 = econfig_util:trim_whitespace(ValueName),
                     RemainingLine = econfig_util:implode(LineValues, "="),
                     % removes comments
                     case re:split(RemainingLine, "\s*;|\t;", [{return, list}]) of
                         [[]] ->
                             % empty line means delete this key
                             ets:delete(?MODULE, {ConfName, AccSectionName,
-                                                 ValueName}),
+                                                 ValueName1}),
                             {AccSectionName, AccValues};
                         [LineValue | _Rest] ->
                             {AccSectionName,
-                             [{{ConfName, AccSectionName, ValueName},
+                             [{{ConfName, AccSectionName, ValueName1},
                                econfig_util:trim_whitespace(LineValue)}
                               | AccValues]}
                         end
@@ -580,5 +583,3 @@ parse_ini_file(ConfName, IniFile) ->
             end
         end, {"", []}, Lines),
     {ok, ParsedIniValues}.
-
-

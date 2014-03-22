@@ -117,4 +117,3 @@ separate_cmd_args(" " ++ Rest, CmdAcc) ->
     {lists:reverse(CmdAcc), " " ++ Rest};
 separate_cmd_args([Char|Rest], CmdAcc) ->
     separate_cmd_args(Rest, [Char | CmdAcc]).
-

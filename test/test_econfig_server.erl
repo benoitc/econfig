@@ -26,7 +26,7 @@ parse_test_() ->
       ?_assertEqual("value6", econfig:get_value(t, "section 2", "key6")),
       ?_assertEqual("value7", econfig:get_value(t, "section 2", "key7")),
       ?_assertEqual("value8", econfig:get_value(t, "section 2", "key8")),
-      ?_assertEqual("value9", econfig:get_value(t, "section 2", "key9")),
+      ?_assertEqual("value 9", econfig:get_value(t, "section 2", "key9")),
       ?_assertEqual("value10", econfig:get_value(t, "section 2", "key10")),
       ?_assertEqual("new-val-11", econfig:get_value(t, "section3", "key11")),
       ?_assertEqual("this is a value for key 13", econfig:get_value(t, "section3", "key13")),
