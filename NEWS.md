@@ -1,5 +1,11 @@
 #econfig news
 
+0.4.2 - 2014-03-22
+------------------
+
+- add: basic unitests
+- fix: trim whitespaces from key and value
+
 0.4.1 - 2013-06-20
 ------------------
 
