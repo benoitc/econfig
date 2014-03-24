@@ -501,8 +501,9 @@ initialize_app_confs1([{ConfName, IniFiles, Options} | Rest],
 parse_inis(ConfName, IniFiles0) ->
     IniFiles = econfig_util:find_files(IniFiles0),
     lists:map(fun(IniFile) ->
-                {ok, ParsedIniValues} = parse_ini_file(ConfName, IniFile),
-                ets:insert(?MODULE, ParsedIniValues)
+                {ok, ParsedIniValues, DelKeys} = parse_ini_file(ConfName, IniFile),
+                ets:insert(?MODULE, ParsedIniValues),
+                lists:foreach(fun(Key) -> ets:delete(?MODULE, Key) end, DelKeys)
         end, IniFiles),
     WriteFile = lists:last(IniFiles),
     WriteFile.
@@ -523,18 +524,18 @@ parse_ini_file(ConfName, IniFile) ->
     end,
 
     Lines = re:split(IniBin, "\r\n|\n|\r|\032", [{return, list}]),
-    {_, ParsedIniValues} =
-    lists:foldl(fun(Line, {AccSectionName, AccValues}) ->
+    {_, ParsedIniValues, DeleteIniKeys} =
+    lists:foldl(fun(Line, {AccSectionName, AccValues, AccDeletes}) ->
             case string:strip(Line) of
             "[" ++ Rest ->
                 case re:split(Rest, "\\]", [{return, list}]) of
                 [NewSectionName, ""] ->
-                    {NewSectionName, AccValues};
+                    {NewSectionName, AccValues, AccDeletes};
                 _Else -> % end bracket not at end, ignore this line
-                    {AccSectionName, AccValues}
+                    {AccSectionName, AccValues, AccDeletes}
                 end;
             ";" ++ _Comment ->
-                {AccSectionName, AccValues};
+                {AccSectionName, AccValues, AccDeletes};
             Line2 ->
                 case re:split(Line2, "\s*=\s*", [{return, list}]) of
                 [Value] ->
@@ -550,18 +551,18 @@ parse_ini_file(ConfName, IniFile) ->
                         case re:split(Value, "\s*;|\t;", [{return, list}]) of
                         [[]] ->
                             % empty line
-                            {AccSectionName, AccValues};
+                            {AccSectionName, AccValues, AccDeletes};
                         [LineValue | _Rest] ->
                             E = {{AccSectionName, ValueName},
                                  PrevValue ++ " " ++
                                  econfig_util:trim_whitespace(LineValue)},
-                            {AccSectionName, [E | AccValuesRest]}
+                            {AccSectionName, [E | AccValuesRest], AccDeletes}
                         end;
                     _ ->
-                        {AccSectionName, AccValues}
+                        {AccSectionName, AccValues, AccDeletes}
                     end;
                 [""|_LineValues] -> % line begins with "=", ignore
-                    {AccSectionName, AccValues};
+                    {AccSectionName, AccValues, AccDeletes};
                 [ValueName|LineValues] -> % yeehaw, got a line!
                     %% replace all tabs by an empty value.
                     ValueName1 = econfig_util:trim_whitespace(ValueName),
@@ -570,16 +571,16 @@ parse_ini_file(ConfName, IniFile) ->
                     case re:split(RemainingLine, "\s*;|\t;", [{return, list}]) of
                         [[]] ->
                             % empty line means delete this key
-                            ets:delete(?MODULE, {ConfName, AccSectionName,
-                                                 ValueName1}),
-                            {AccSectionName, AccValues};
+                            AccDeletes1 = [{ConfName, AccSectionName, ValueName1}
+                                           | AccDeletes],
+                            {AccSectionName, AccValues, AccDeletes1};
                         [LineValue | _Rest] ->
                             {AccSectionName,
                              [{{ConfName, AccSectionName, ValueName1},
                                econfig_util:trim_whitespace(LineValue)}
-                              | AccValues]}
+                              | AccValues], AccDeletes}
                         end
                 end
             end
-        end, {"", []}, Lines),
-    {ok, ParsedIniValues}.
+        end, {"", [], []}, Lines),
+    {ok, ParsedIniValues, DeleteIniKeys}.

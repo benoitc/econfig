@@ -30,7 +30,8 @@ parse_test_() ->
       ?_assertEqual("value10", econfig:get_value(t, "section 2", "key10")),
       ?_assertEqual("new-val-11", econfig:get_value(t, "section3", "key11")),
       ?_assertEqual("this is a value for key 13", econfig:get_value(t, "section3", "key13")),
-      ?_assertEqual("some-collection.of+random@characters", econfig:get_value(t, "section3", "key14"))
+      ?_assertEqual("some-collection.of+random@characters", econfig:get_value(t, "section3", "key14")),
+      ?_assertEqual(undefined, econfig:get_value(t, "section3", "key15"))
      ]}.
 
 modify_test_() ->
