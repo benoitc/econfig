@@ -353,8 +353,14 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
     end,
     case Result of
         ok ->
-            true = ets:insert(?MODULE, {{ConfName, Section, Key},
-                                        Value}),
+            Value1 = econfig_util:trim_whitespace(Value),
+            case Value1 of
+                [] ->
+                    true = ets:delete(?MODULE, {ConfName, Section, Key});
+                _ ->
+                    true = ets:insert(?MODULE, {{ConfName, Section, Key},
+                                                Value1})
+            end,
             notify_change(ConfName, set, Section, Key),
             {reply, ok, State};
         _Error ->
@@ -372,9 +378,16 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
     end,
     case Result of
         ok ->
-            lists:foreach(fun({Key,Value}) ->
-                        true = ets:insert(?MODULE, {{ConfName, Section,
-                                                     Key},Value})
+            lists:foreach(
+                fun({Key,Value}) ->
+                    Value1 = econfig_util:trim_whitespace(Value),
+                    case Value1 of
+                        [] ->
+                            true = ets:delete(?MODULE, {ConfName, Section, Key});
+                        _ ->
+                            true = ets:insert(?MODULE, {{ConfName, Section,
+                                                         Key},Value1})
+                    end
                 end, List),
             notify_change(ConfName, set, Section),
             {reply, ok, State};
