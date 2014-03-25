@@ -96,72 +96,73 @@ modify_multi_test_() ->
     {setup,
      fun setup_multi/0,
      fun cleanup/1,
-     [% modify existing key first file
-      fun() ->
-          econfig:set_value(t, "section 2", "key10", "value10modified"),
-          ?assertEqual("value10modified", econfig:get_value(t, "section 2", "key10"))
-      end,
-      % modify existing key first file with reload
-      fun() ->
-          econfig:set_value(t, "section 2", "key10", "value10modified"),
-          econfig:reload(t),
-          ?assertEqual("value10modified", econfig:get_value(t, "section 2", "key10"))
-      end,
-      % modify existing key last file
-      fun() ->
-          econfig:set_value(t, "section 2", "key888", "value 888 modified"),
-          ?assertEqual("value 888 modified", econfig:get_value(t, "section 2", "key888"))
-      end,
-      % modify existing key last file with reload
-      fun() ->
-          econfig:set_value(t, "section 2", "key888", "value 888 modified"),
-          econfig:reload(t),
-          ?assertEqual("value 888 modified", econfig:get_value(t, "section 2", "key888"))
-      end,
-      % modify existing matching key
-      fun() ->
-          econfig:set_value(t, "section 2", "key6", "value6modified"),
-          ?assertEqual("value6modified", econfig:get_value(t, "section 2", "key6"))
-      end,
-      % modify existing matching key with reload
-      fun() ->
-          econfig:set_value(t, "section 2", "key6", "value6modified"),
-          econfig:reload(t),
-          ?assertEqual("value6modified", econfig:get_value(t, "section 2", "key6"))
-      end,
-      % modify existing matching key to empty value
-      fun() ->
-          econfig:set_value(t, "section 2", "key6", ""),
-          ?assertEqual(undefined, econfig:get_value(t, "section 2", "key6"))
-      end,
-      % modify existing matching key to empty value with reload
-      fun() ->
-          econfig:set_value(t, "section 2", "key6", ""),
-          econfig:reload(t),
-          ?assertEqual(undefined, econfig:get_value(t, "section 2", "key6"))
-      end,
-      % delete existing matching key
-      fun() ->
-          econfig:delete_value(t, "section 2", "key7"),
-          ?assertEqual(undefined, econfig:get_value(t, "section 2", "key7"))
-      end,
-      % modify existing key via list
-      fun() ->
-          econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
-          ?assertEqual("value1", econfig:get_value(t, "section10", "key1"))
-      end,
-      % modify existing key to empty value via list
-      fun() ->
-          econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
-          ?assertEqual(undefined, econfig:get_value(t, "section10", "key2"))
-      end,
-      % modify existing key to empty value via list with reload
-      fun() ->
-          econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
-          econfig:reload(t),
-          ?assertEqual(undefined, econfig:get_value(t, "section10", "key2"))
-      end
-     ]}.
+     {inorder,
+      [% modify existing key first file
+       fun() ->
+           econfig:set_value(t, "section 2", "key10", "value10modified"),
+           ?assertEqual("value10modified", econfig:get_value(t, "section 2", "key10"))
+       end,
+       % modify existing key first file with reload
+       fun() ->
+           econfig:set_value(t, "section 2", "key10", "value10modified"),
+           econfig:reload(t),
+           ?assertEqual("value10modified", econfig:get_value(t, "section 2", "key10"))
+       end,
+       % modify existing key last file
+       fun() ->
+           econfig:set_value(t, "section 2", "key888", "value 888 modified"),
+           ?assertEqual("value 888 modified", econfig:get_value(t, "section 2", "key888"))
+       end,
+       % modify existing key last file with reload
+       fun() ->
+           econfig:set_value(t, "section 2", "key888", "value 888 modified"),
+           econfig:reload(t),
+           ?assertEqual("value 888 modified", econfig:get_value(t, "section 2", "key888"))
+       end,
+       % modify existing matching key
+       fun() ->
+           econfig:set_value(t, "section 2", "key6", "value6modified"),
+           ?assertEqual("value6modified", econfig:get_value(t, "section 2", "key6"))
+       end,
+       % modify existing matching key with reload
+       fun() ->
+           econfig:set_value(t, "section 2", "key6", "value6modified"),
+           econfig:reload(t),
+           ?assertEqual("value6modified", econfig:get_value(t, "section 2", "key6"))
+       end,
+       % modify existing matching key to empty value
+       fun() ->
+           econfig:set_value(t, "section 2", "key6", ""),
+           ?assertEqual(undefined, econfig:get_value(t, "section 2", "key6"))
+       end,
+       % modify existing matching key to empty value with reload
+       fun() ->
+           econfig:set_value(t, "section 2", "key6", ""),
+           econfig:reload(t),
+           ?assertEqual(undefined, econfig:get_value(t, "section 2", "key6"))
+       end,
+       % delete existing matching key
+       fun() ->
+           econfig:delete_value(t, "section 2", "key7"),
+           ?assertEqual(undefined, econfig:get_value(t, "section 2", "key7"))
+       end,
+       % modify existing key via list
+       fun() ->
+           econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
+           ?assertEqual("value1", econfig:get_value(t, "section10", "key1"))
+       end,
+       % modify existing key to empty value via list
+       fun() ->
+           econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
+           ?assertEqual(undefined, econfig:get_value(t, "section10", "key2"))
+       end,
+       % modify existing key to empty value via list with reload
+       fun() ->
+           econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
+           econfig:reload(t),
+           ?assertEqual(undefined, econfig:get_value(t, "section10", "key2"))
+       end
+      ]}}.
 
 subscribe_test_() ->
     {setup,
