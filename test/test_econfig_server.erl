@@ -168,7 +168,13 @@ subscribe_test_() ->
     {setup,
      fun setup/0,
      fun cleanup/1,
-     [% test subscribe
+     [% test basic subscribe/unsubscribe results
+      fun() ->
+          ResultSubscribe = econfig:subscribe(t),
+          ResultUnsubscribe = econfig:unsubscribe(t),
+          ?assertEqual([true, true], [ResultSubscribe, ResultUnsubscribe])
+      end,
+      % test subscribe update
       fun() ->
           econfig:subscribe(t),
           econfig:set_value(t, "section 2", "key666", "value666"),
@@ -176,6 +182,16 @@ subscribe_test_() ->
           receive
               Message ->
                   ?assertEqual({config_updated, t, {set, {"section 2", "key666"}}}, Message)
+          end
+      end,
+      % test subscribe delete
+      fun() ->
+          econfig:subscribe(t),
+          econfig:delete_value(t, "section 2", "key6"),
+          econfig:unsubscribe(t),
+          receive
+              Message ->
+                  ?assertEqual({config_updated, t, {delete, {"section 2", "key6"}}}, Message)
           end
       end,
       % test unsubscribe
