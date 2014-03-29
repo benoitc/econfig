@@ -545,8 +545,9 @@ parse_ini_bin_to_sections(IniBin) ->
 parse_ini_sections_to_conf(ConfName, Sections) ->
     lists:foldl(
         fun([Name|Content], Acc) ->
-            case re:run(Content, <<"(?:^|\\n)[\\n]*((?:(?!;).)*?)=(.*?)(?:;.*?)?(?=\\n|$)">>,
-                        [global, dotall, {capture, all_but_first, list}]) of
+            case re:run(Content, <<"^((?:(?!;).)*?)=(.*?)(?:;.*?)?$">>,
+                        [global, multiline, {newline, any},
+                         {capture, all_but_first, list}]) of
                 {match, KVList} ->
                     lists:foldl(
                         fun([K, V], {I, D}) ->
