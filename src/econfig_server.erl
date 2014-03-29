@@ -521,7 +521,6 @@ parse_inis(ConfName, IniFiles0) ->
     WriteFile = lists:last(IniFiles),
     WriteFile.
 
-
 parse_ini_file(ConfName, IniFile) ->
     IniFilename = econfig_util:abs_pathname(IniFile),
     IniBin =
@@ -535,65 +534,36 @@ parse_ini_file(ConfName, IniFile) ->
             Msg = list_to_binary(io_lib:format(Fmt, [IniFilename])),
             throw({startup_error, Msg})
     end,
-
-    Lines = re:split(IniBin, "\r\n|\n|\r|\032", [{return, list}]),
-    {_, ParsedIniValues, DeleteIniKeys} =
-    lists:foldl(fun(Line, {AccSectionName, AccValues, AccDeletes}) ->
-            case string:strip(Line) of
-            "[" ++ Rest ->
-                case re:split(Rest, "\\]", [{return, list}]) of
-                [NewSectionName, ""] ->
-                    {NewSectionName, AccValues, AccDeletes};
-                _Else -> % end bracket not at end, ignore this line
-                    {AccSectionName, AccValues, AccDeletes}
-                end;
-            ";" ++ _Comment ->
-                {AccSectionName, AccValues, AccDeletes};
-            Line2 ->
-                case re:split(Line2, "\s*=\s*", [{return, list}]) of
-                [Value] ->
-                    MultiLineValuePart = case re:run(Line, "^ \\S", []) of
-                    {match, _} ->
-                        true;
-                    _ ->
-                        false
-                    end,
-                    case {MultiLineValuePart, AccValues} of
-                    {true, [{{_, ValueName}, PrevValue} | AccValuesRest]} ->
-                        % remove comment
-                        case re:split(Value, "\s*;|\t;", [{return, list}]) of
-                        [[]] ->
-                            % empty line
-                            {AccSectionName, AccValues, AccDeletes};
-                        [LineValue | _Rest] ->
-                            E = {{AccSectionName, ValueName},
-                                 PrevValue ++ " " ++
-                                 econfig_util:trim_whitespace(LineValue)},
-                            {AccSectionName, [E | AccValuesRest], AccDeletes}
-                        end;
-                    _ ->
-                        {AccSectionName, AccValues, AccDeletes}
-                    end;
-                [""|_LineValues] -> % line begins with "=", ignore
-                    {AccSectionName, AccValues, AccDeletes};
-                [ValueName|LineValues] -> % yeehaw, got a line!
-                    %% replace all tabs by an empty value.
-                    ValueName1 = econfig_util:trim_whitespace(ValueName),
-                    RemainingLine = econfig_util:implode(LineValues, "="),
-                    % removes comments
-                    case re:split(RemainingLine, "\s*;|\t;", [{return, list}]) of
-                        [[]] ->
-                            % empty line means delete this key
-                            AccDeletes1 = [{ConfName, AccSectionName, ValueName1}
-                                           | AccDeletes],
-                            {AccSectionName, AccValues, AccDeletes1};
-                        [LineValue | _Rest] ->
-                            {AccSectionName,
-                             [{{ConfName, AccSectionName, ValueName1},
-                               econfig_util:trim_whitespace(LineValue)}
-                              | AccValues], AccDeletes}
-                        end
-                end
-            end
-        end, {"", [], []}, Lines),
+    {match, Sections} = parse_ini_bin_to_sections(IniBin),
+    {ParsedIniValues, DeleteIniKeys} = parse_ini_sections_to_conf(ConfName, Sections),
     {ok, ParsedIniValues, DeleteIniKeys}.
+
+parse_ini_bin_to_sections(IniBin) ->
+    re:run(IniBin, <<"(?:\\[([^\\]]+)\\](.*?(?=(?:\\n\\[|$))))+">>,
+           [global, dotall, {capture, all_but_first, binary}]).
+
+parse_ini_sections_to_conf(ConfName, Sections) ->
+    lists:foldl(
+        fun([Name|Content], Acc) ->
+            case re:run(Content, <<"^((?:(?!;).)*?)=(.*?)(?:;.*?)?$">>,
+                        [global, multiline, {newline, any},
+                         {capture, all_but_first, list}]) of
+                {match, KVList} ->
+                    lists:foldl(
+                        fun([K, V], {I, D}) ->
+                            K1 = econfig_util:trim_whitespace(K),
+                            V1 = econfig_util:trim_whitespace(V),
+                            case V1 of
+                                [] ->
+                                    {I, [{ConfName, binary_to_list(Name), K1} | D]};
+                                _ ->
+                                    {[{{ConfName, binary_to_list(Name), K1}, V1} | I], D}
+                            end
+                        end,
+                        Acc, KVList);
+                _ ->
+                    Acc
+            end
+        end,
+        {[], []},
+        Sections).
