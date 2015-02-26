@@ -579,7 +579,7 @@ parse_ini_file(ConfName, IniFile) ->
                         [LineValue | _Rest] ->
                             E = {{AccSectionName, ValueName},
                                  PrevValue ++ " " ++
-                                 econfig_util:trim_whitespace(unicode:characters_to_list(LineValue))},
+                                 unicode:characters_to_list(list_to_binary(econfig_util:trim_whitespace(LineValue)))},
                             {AccSectionName, [E | AccValuesRest], AccDeletes}
                         end;
                     _ ->
@@ -589,19 +589,18 @@ parse_ini_file(ConfName, IniFile) ->
                     {AccSectionName, AccValues, AccDeletes};
                 [ValueName|LineValues] -> % yeehaw, got a line!
                     %% replace all tabs by an empty value.
-                    ValueName1 = econfig_util:trim_whitespace(ValueName),
-                    ValueName2 = unicode:characters_to_list(list_to_binary(ValueName1)),
+                    ValueName1 = unicode:characters_to_list(list_to_binary(econfig_util:trim_whitespace(ValueName))),
                     RemainingLine = econfig_util:implode(LineValues, "="),
                     % removes comments
                     case re:split(unicode:characters_to_binary(RemainingLine), InlineComment) of
                         [<<>>] ->
                             % empty line means delete this key
-                            AccDeletes1 = [{ConfName, AccSectionName, ValueName2}
+                            AccDeletes1 = [{ConfName, AccSectionName, ValueName1}
                                            | AccDeletes],
                             {AccSectionName, AccValues, AccDeletes1};
                         [LineValue | _Rest] ->
                             {AccSectionName,
-                             [{{ConfName, AccSectionName, ValueName2},
+                             [{{ConfName, AccSectionName, ValueName1},
                                unicode:characters_to_list(list_to_binary(econfig_util:trim_whitespace(LineValue)))}
                               | AccValues], AccDeletes}
                         end
