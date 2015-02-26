@@ -1,3 +1,4 @@
+%% -*- coding: utf-8 -*-
 -module(test_econfig_server).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -24,7 +25,7 @@ parse_test_() ->
     {setup,
      fun setup/0,
      fun cleanup/1,
-     [?_assertEqual(lists:sort(["section1", "section 2", "section3", "section4"]), lists:sort(econfig:sections(t))),
+     [?_assertEqual(lists:sort(["section1", "section 2", "section3", "секция_4"]), lists:sort(econfig:sections(t))),
       ?_assertEqual("value1", econfig:get_value(t, "section1", "key1")),
       ?_assertEqual("value 2", econfig:get_value(t, "section1", "key2")),
       ?_assertEqual("value 3", econfig:get_value(t, "section1", "key 3")),
@@ -39,10 +40,12 @@ parse_test_() ->
       ?_assertEqual("this is a value for key 13", econfig:get_value(t, "section3", "key13")),
       ?_assertEqual("some-collection.of+random@characters", econfig:get_value(t, "section3", "key14")),
       ?_assertEqual(undefined, econfig:get_value(t, "section3", "key15")),
-      ?_assertEqual("value 16", econfig:get_value(t, "section4", "key16")),
-      ?_assertEqual("value 17", econfig:get_value(t, "section4", "key17")),
-      ?_assertEqual("", econfig:get_value(t, "section4", "key18")),
-      ?_assertEqual("one, two, three, four", econfig:get_value(t, "section4", "key19"))
+      ?_assertEqual("value 16", econfig:get_value(t, "секция_4", "key16")),
+      ?_assertEqual("value 17", econfig:get_value(t, "секция_4", "key17")),
+      ?_assertEqual("", econfig:get_value(t, "секция_4", "key18")),
+      ?_assertEqual("one, two, three, four", econfig:get_value(t, "секция_4", "key19")),
+      ?_assertEqual("Остап-Сулейман-Берта-Мария-Бендер-бей", econfig:get_value(t, "секция_4", "key20")),
+      ?_assertEqual("Графиня изменившимся лицом бежит пруду", econfig:get_value(t, "секция_4", "ключ21"))
      ]}.
 
 parse_multi_test_() ->

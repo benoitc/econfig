@@ -116,8 +116,9 @@ sections(ConfigName) ->
 %% @doc get all sections starting by Prefix
 prefix(ConfigName, Prefix) ->
     Matches = ets:match(?MODULE, {{ConfigName, '$1', '_'}, '_'}),
+    {ok, MP} = re:compile(Prefix, [unicode]),
     Found = lists:foldl(fun([Match], Acc) ->
-                    case re:split(Match, Prefix, [{return,list}]) of
+                    case re:split(Match, MP, [{return,list}]) of
                         [Match] -> Acc;
                         _ ->
                             case lists:member(Match, Acc) of
@@ -144,8 +145,9 @@ cfg2list(ConfigName) ->
 %% @doc retrieve config as a proplist
 cfg2list(ConfigName, GroupKey) ->
     Matches = ets:match(?MODULE, {{ConfigName, '$1', '$2'}, '$3'}),
+    {ok, MPGroupKey} = re:compile(GroupKey, [unicode]),
     lists:foldl(fun([Section, Key, Value], Props) ->
-                case re:split(Section, GroupKey, [{return,list}]) of
+                case re:split(Section, MPGroupKey, [{return,list}]) of
                     [Section] ->
                         case lists:keyfind(Section, 1, Props) of
                             false ->
@@ -536,14 +538,21 @@ parse_ini_file(ConfName, IniFile) ->
             throw({startup_error, Msg})
     end,
 
-    Lines = re:split(IniBin, "\r\n|\n|\r|\032", [{return, list}]),
+    {ok, NewLine} = re:compile("\r\n|\n|\r|\032", [unicode]),
+    {ok, CloseBraket} = re:compile("\\]", [unicode]),
+    {ok, KeyValue} = re:compile("\s*=\s*", [unicode]),
+    {ok, InlineComment} = re:compile("\s*[;#]|\t[;#]", [unicode]),
+    {ok, MultiLineValuePartP} = re:compile("^ \\S", [unicode]),
+
+    Lines = re:split(IniBin, NewLine),
+
     {_, ParsedIniValues, DeleteIniKeys} =
     lists:foldl(fun(Line, {AccSectionName, AccValues, AccDeletes}) ->
-            case string:strip(Line) of
+            case string:strip(unicode:characters_to_list(Line)) of
             "[" ++ Rest ->
-                case re:split(Rest, "\\]", [{return, list}]) of
-                [NewSectionName, ""] ->
-                    {NewSectionName, AccValues, AccDeletes};
+                case re:split(unicode:characters_to_binary(Rest), CloseBraket) of
+                [NewSectionName, <<>>] ->
+                    {unicode:characters_to_list(NewSectionName), AccValues, AccDeletes};
                 _Else -> % end bracket not at end, ignore this line
                     {AccSectionName, AccValues, AccDeletes}
                 end;
@@ -552,9 +561,9 @@ parse_ini_file(ConfName, IniFile) ->
             "#" ++ _Comment ->
                 {AccSectionName, AccValues, AccDeletes};
             Line2 ->
-                case re:split(Line2, "\s*=\s*", [{return, list}]) of
+                case re:split(unicode:characters_to_binary(Line2), KeyValue) of
                 [Value] ->
-                    MultiLineValuePart = case re:run(Line, "^ \\S", []) of
+                    MultiLineValuePart = case re:run(Line, MultiLineValuePartP, []) of
                     {match, _} ->
                         true;
                     _ ->
@@ -563,36 +572,37 @@ parse_ini_file(ConfName, IniFile) ->
                     case {MultiLineValuePart, AccValues} of
                     {true, [{{_, ValueName}, PrevValue} | AccValuesRest]} ->
                         % remove comment
-                        case re:split(Value, "\s*[;#]|\t[;#]", [{return, list}]) of
-                        [[]] ->
+                        case re:split(Value, InlineComment) of
+                        [<<>>] ->
                             % empty line
                             {AccSectionName, AccValues, AccDeletes};
                         [LineValue | _Rest] ->
                             E = {{AccSectionName, ValueName},
                                  PrevValue ++ " " ++
-                                 econfig_util:trim_whitespace(LineValue)},
+                                 econfig_util:trim_whitespace(unicode:characters_to_list(LineValue))},
                             {AccSectionName, [E | AccValuesRest], AccDeletes}
                         end;
                     _ ->
                         {AccSectionName, AccValues, AccDeletes}
                     end;
-                [""|_LineValues] -> % line begins with "=", ignore
+                [<<>>|_LineValues] -> % line begins with "=", ignore
                     {AccSectionName, AccValues, AccDeletes};
                 [ValueName|LineValues] -> % yeehaw, got a line!
                     %% replace all tabs by an empty value.
                     ValueName1 = econfig_util:trim_whitespace(ValueName),
+                    ValueName2 = unicode:characters_to_list(list_to_binary(ValueName1)),
                     RemainingLine = econfig_util:implode(LineValues, "="),
                     % removes comments
-                    case re:split(RemainingLine, "\s*[;#]|\t[;#]", [{return, list}]) of
-                        [[]] ->
+                    case re:split(unicode:characters_to_binary(RemainingLine), InlineComment) of
+                        [<<>>] ->
                             % empty line means delete this key
-                            AccDeletes1 = [{ConfName, AccSectionName, ValueName1}
+                            AccDeletes1 = [{ConfName, AccSectionName, ValueName2}
                                            | AccDeletes],
                             {AccSectionName, AccValues, AccDeletes1};
                         [LineValue | _Rest] ->
                             {AccSectionName,
-                             [{{ConfName, AccSectionName, ValueName1},
-                               econfig_util:trim_whitespace(LineValue)}
+                             [{{ConfName, AccSectionName, ValueName2},
+                               unicode:characters_to_list(list_to_binary(econfig_util:trim_whitespace(LineValue)))}
                               | AccValues], AccDeletes}
                         end
                 end
