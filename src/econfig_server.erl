@@ -549,6 +549,8 @@ parse_ini_file(ConfName, IniFile) ->
                 end;
             ";" ++ _Comment ->
                 {AccSectionName, AccValues, AccDeletes};
+            "#" ++ _Comment ->
+                {AccSectionName, AccValues, AccDeletes};
             Line2 ->
                 case re:split(Line2, "\s*=\s*", [{return, list}]) of
                 [Value] ->
@@ -561,7 +563,7 @@ parse_ini_file(ConfName, IniFile) ->
                     case {MultiLineValuePart, AccValues} of
                     {true, [{{_, ValueName}, PrevValue} | AccValuesRest]} ->
                         % remove comment
-                        case re:split(Value, "\s*;|\t;", [{return, list}]) of
+                        case re:split(Value, "\s*[;#]|\t[;#]", [{return, list}]) of
                         [[]] ->
                             % empty line
                             {AccSectionName, AccValues, AccDeletes};
@@ -581,7 +583,7 @@ parse_ini_file(ConfName, IniFile) ->
                     ValueName1 = econfig_util:trim_whitespace(ValueName),
                     RemainingLine = econfig_util:implode(LineValues, "="),
                     % removes comments
-                    case re:split(RemainingLine, "\s*;|\t;", [{return, list}]) of
+                    case re:split(RemainingLine, "\s*[;#]|\t[;#]", [{return, list}]) of
                         [[]] ->
                             % empty line means delete this key
                             AccDeletes1 = [{ConfName, AccSectionName, ValueName1}

@@ -24,7 +24,7 @@ parse_test_() ->
     {setup,
      fun setup/0,
      fun cleanup/1,
-     [?_assertEqual(lists:sort(["section1", "section 2", "section3"]), lists:sort(econfig:sections(t))),
+     [?_assertEqual(lists:sort(["section1", "section 2", "section3", "section4"]), lists:sort(econfig:sections(t))),
       ?_assertEqual("value1", econfig:get_value(t, "section1", "key1")),
       ?_assertEqual("value 2", econfig:get_value(t, "section1", "key2")),
       ?_assertEqual("value 3", econfig:get_value(t, "section1", "key 3")),
@@ -38,7 +38,11 @@ parse_test_() ->
       ?_assertEqual("new-val-11", econfig:get_value(t, "section3", "key11")),
       ?_assertEqual("this is a value for key 13", econfig:get_value(t, "section3", "key13")),
       ?_assertEqual("some-collection.of+random@characters", econfig:get_value(t, "section3", "key14")),
-      ?_assertEqual(undefined, econfig:get_value(t, "section3", "key15"))
+      ?_assertEqual(undefined, econfig:get_value(t, "section3", "key15")),
+      ?_assertEqual("value 16", econfig:get_value(t, "section4", "key16")),
+      ?_assertEqual("value 17", econfig:get_value(t, "section4", "key17")),
+      ?_assertEqual("", econfig:get_value(t, "section4", "key18")),
+      ?_assertEqual("one, two, three, four", econfig:get_value(t, "section4", "key19"))
      ]}.
 
 parse_multi_test_() ->
