@@ -194,17 +194,14 @@ get_float(ConfigName, Section, Key) ->
 
 %% @ doc get value for a key in a section, parse it as [string()]
 get_list(ConfigName, Section, Key) ->
-    Value = case econfig_server:get_value(ConfigName, Section, Key) of
-                undefined ->
-                    Error = lists:flatten(io_lib:format("~ts.~ts.~ts wait for list but got undefined",
-                                                        [ConfigName, Section, Key])),
-                    throw({econfig_error, Error});
-                V -> V
-            end,
-    lists:filtermap(fun(V) ->
-                            case string:strip(V) of
-                                "" -> false;
-                                V2 -> {true, V2}
-                            end
-                    end,
-                    string:tokens(Value, ",")).
+    case econfig_server:get_value(ConfigName, Section, Key) of
+        undefined -> [];
+        Value ->
+            lists:filtermap(fun(V) ->
+                                    case string:strip(V) of
+                                        "" -> false;
+                                        V2 -> {true, V2}
+                                    end
+                            end,
+                            string:tokens(Value, ","))
+    end.

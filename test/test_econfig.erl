@@ -56,7 +56,7 @@ parse_test_() ->
                     econfig:get_list(t, "list_section", "key1")),
       ?_assertEqual(["Bob", "Bill", "Helen"],
                     econfig:get_list(t, "list_section", "key2")),
-      ?_assertThrow({econfig_error, "t.list_section.key3 wait for list but got undefined"},
+      ?_assertEqual([],
                     econfig:get_list(t, "list_section", "key3")),
       ?_assertEqual(["apple"],
                     econfig:get_list(t, "list_section", "key4")),
