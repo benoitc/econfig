@@ -19,6 +19,7 @@
          get_value/2, get_value/3, get_value/4,
          set_value/3, set_value/4, set_value/5,
          delete_value/2, delete_value/3, delete_value/4,
+         get_bool/2, get_int/2, get_float/2, get_list/2, get_string/2, get_binary/2,
          get_bool/3, get_int/3, get_float/3, get_list/3, get_string/3, get_binary/3]).
 
 -type inifile() :: string().
@@ -163,6 +164,8 @@ delete_value(ConfigName, Section, Key, Persist) ->
     econfig_server:delete_value(ConfigName, Section, Key, Persist).
 
 %% @ doc get value for a key in a section, try to cast it to boolean()
+get_bool(Section, Key) -> get_bool(main, Section, Key).
+
 get_bool(ConfigName, Section, Key) ->
     case econfig_server:get_value(ConfigName, Section, Key) of
         "true" -> true;
@@ -173,6 +176,8 @@ get_bool(ConfigName, Section, Key) ->
     end.
 
 %% @ doc get value for a key in a section, try to cast it to integer()
+get_int(Section, Key) -> get_int(main, Section, Key).
+
 get_int(ConfigName, Section, Key) ->
     Value = econfig_server:get_value(ConfigName, Section, Key),
     case string:to_integer(Value) of
@@ -183,6 +188,8 @@ get_int(ConfigName, Section, Key) ->
     end.
 
 %% @ doc get value for a key in a section, try to cast it to float()
+get_float(Section, Key) -> get_float(main, Section, Key).
+
 get_float(ConfigName, Section, Key) ->
     Value = econfig_server:get_value(ConfigName, Section, Key),
     case string:to_float(Value) of
@@ -193,6 +200,8 @@ get_float(ConfigName, Section, Key) ->
     end.
 
 %% @ doc get value for a key in a section, parse it as [string()]
+get_list(Section, Key) -> get_list(main, Section, Key).
+
 get_list(ConfigName, Section, Key) ->
     case econfig_server:get_value(ConfigName, Section, Key) of
         undefined -> [];
@@ -207,10 +216,14 @@ get_list(ConfigName, Section, Key) ->
     end.
 
 %% @ doc just synonym to get_value
+get_string(Section, Key) -> get_string(main, Section, Key).
+
 get_string(ConfigName, Section, Key) ->
     econfig_server:get_value(ConfigName, Section, Key).
 
 %% @ doc get value for a key in a section, return it as binary()
+get_binary(Section, Key) -> get_binary(main, Section, Key).
+
 get_binary(ConfigName, Section, Key) ->
     case econfig_server:get_value(ConfigName, Section, Key) of
         undefined -> undefined;
