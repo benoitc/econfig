@@ -26,16 +26,18 @@ parse_test_() ->
                     econfig:get_bool(t, "bool_section", "key3")),
       ?_assertThrow({econfig_error, "t.bool_section.key4 wait for boolean but got \"bla-bla-bla\""},
                     econfig:get_bool(t, "bool_section", "key4")),
+
       ?_assertEqual(0,
-                    econfig:get_integer(t, "int_section", "key1")),
+                    econfig:get_int(t, "int_section", "key1")),
       ?_assertEqual(-100,
-                    econfig:get_integer(t, "int_section", "key2")),
+                    econfig:get_int(t, "int_section", "key2")),
       ?_assertEqual(100,
-                    econfig:get_integer(t, "int_section", "key3")),
+                    econfig:get_int(t, "int_section", "key3")),
       ?_assertThrow({econfig_error, "t.int_section.key4 wait for integer but got undefined"},
-                    econfig:get_integer(t, "int_section", "key4")),
+                    econfig:get_int(t, "int_section", "key4")),
       ?_assertThrow({econfig_error, "t.int_section.key5 wait for integer but got \"bla-bla-bla\""},
-                    econfig:get_integer(t, "int_section", "key5")),
+                    econfig:get_int(t, "int_section", "key5")),
+
       ?_assertEqual(5.5,
                     econfig:get_float(t, "float_section", "key1")),
       ?_assertThrow({econfig_error, "t.float_section.key2 wait for float but got \"5\""},
@@ -52,6 +54,7 @@ parse_test_() ->
                     econfig:get_float(t, "float_section", "key7")),
       ?_assertThrow({econfig_error, "t.float_section.key8 wait for float but got \"bla-bla-bla\""},
                     econfig:get_float(t, "float_section", "key8")),
+
       ?_assertEqual(["one", "two", "three"],
                     econfig:get_list(t, "list_section", "key1")),
       ?_assertEqual(["Bob", "Bill", "Helen"],
@@ -69,5 +72,23 @@ parse_test_() ->
       ?_assertEqual(["apple", "banana"],
                     econfig:get_list(t, "list_section", "key8")),
       ?_assertEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-                    econfig:get_list(t, "list_section", "key9"))
+                    econfig:get_list(t, "list_section", "key9")),
+
+      ?_assertEqual("true",
+                    econfig:get_string(t, "bool_section", "key1")),
+      ?_assertEqual("false",
+                    econfig:get_string(t, "bool_section", "key2")),
+      ?_assertEqual(undefined,
+                    econfig:get_string(t, "bool_section", "key3")),
+      ?_assertEqual("bla-bla-bla",
+                    econfig:get_string(t, "bool_section", "key4")),
+
+      ?_assertEqual(<<"true">>,
+                    econfig:get_binary(t, "bool_section", "key1")),
+      ?_assertEqual(<<"false">>,
+                    econfig:get_binary(t, "bool_section", "key2")),
+      ?_assertEqual(undefined,
+                    econfig:get_binary(t, "bool_section", "key3")),
+      ?_assertEqual(<<"bla-bla-bla">>,
+                    econfig:get_binary(t, "bool_section", "key4"))
      ]}.

@@ -19,7 +19,7 @@
          get_value/2, get_value/3, get_value/4,
          set_value/3, set_value/4, set_value/5,
          delete_value/2, delete_value/3, delete_value/4,
-         get_bool/3, get_integer/3, get_float/3, get_list/3]).
+         get_bool/3, get_int/3, get_float/3, get_list/3, get_string/3, get_binary/3]).
 
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
@@ -173,7 +173,7 @@ get_bool(ConfigName, Section, Key) ->
     end.
 
 %% @ doc get value for a key in a section, try to cast it to integer()
-get_integer(ConfigName, Section, Key) ->
+get_int(ConfigName, Section, Key) ->
     Value = econfig_server:get_value(ConfigName, Section, Key),
     case string:to_integer(Value) of
         {Int, []} -> Int;
@@ -204,4 +204,15 @@ get_list(ConfigName, Section, Key) ->
                                     end
                             end,
                             string:tokens(Value, ","))
+    end.
+
+%% @ doc just synonym to get_value
+get_string(ConfigName, Section, Key) ->
+    econfig_server:get_value(ConfigName, Section, Key).
+
+%% @ doc get value for a key in a section, return it as binary()
+get_binary(ConfigName, Section, Key) ->
+    case econfig_server:get_value(ConfigName, Section, Key) of
+        undefined -> undefined;
+        Value -> list_to_binary(Value)
     end.
