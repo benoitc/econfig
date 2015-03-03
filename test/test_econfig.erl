@@ -22,7 +22,7 @@ parse_test_() ->
                     econfig:get_bool(t, "bool_section", "key1")),
       ?_assertEqual(false,
                     econfig:get_bool(t, "bool_section", "key2")),
-      ?_assertThrow({econfig_error, "t.bool_section.key3 wait for boolean but got undefined"},
+      ?_assertEqual(false,
                     econfig:get_bool(t, "bool_section", "key3")),
       ?_assertThrow({econfig_error, "t.bool_section.key4 wait for boolean but got \"bla-bla-bla\""},
                     econfig:get_bool(t, "bool_section", "key4")),

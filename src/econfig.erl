@@ -170,6 +170,7 @@ get_bool(ConfigName, Section, Key) ->
     case econfig_server:get_value(ConfigName, Section, Key) of
         "true" -> true;
         "false" -> false;
+        undefined -> false;
         Value -> Error = lists:flatten(io_lib:format("~ts.~ts.~ts wait for boolean but got ~p",
                                                      [ConfigName, Section, Key, Value])),
                  throw({econfig_error, Error})
