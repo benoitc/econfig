@@ -87,10 +87,15 @@ to_list(V) ->
     lists:flatten(io_lib:format("~p", [V])).
 
 %% @doc trims whitespace
+trim_whitespace(Value) when is_list(Value) ->
+    trim_whitespace(unicode:characters_to_binary(Value));
 trim_whitespace(Value) ->
+    {ok, Left} = re:compile("^[\s\t]+", [unicode]),
+    {ok, Right} = re:compile("[\s\t]+$", [unicode]),
+    Options = [{return, list}, global],
     re:replace(
-        re:replace(Value, "^[\s\t]+", "", [{return, list}, global]),
-        "[\s\t]+$", "", [{return, list}, global]).
+        re:replace(Value, Left, "", Options),
+        Right, "", Options).
 
 %% --
 %% private functions
