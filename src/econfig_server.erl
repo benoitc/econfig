@@ -257,20 +257,13 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
     {Resp, NewState} =
         try
             WriteFile = parse_inis(ConfName, IniFiles),
-            Pid = case proplists:get_value(autoreload, Options) of
-                true ->
-                    {ok, Pid0} =
-                                econfig_watcher_sup:start_watcher(ConfName,
-                                                                  IniFiles),
-                    Pid0;
+            {ok, Pid} = case proplists:get_value(autoreload, Options) of
+                true -> 
+                    econfig_watcher_sup:start_watcher(ConfName, IniFiles);
                 Delay when is_integer(Delay) ->
-                    {ok, Pid0} =
-                                econfig_watcher_sup:start_watcher(ConfName,
-                                                                  IniFiles,
-                                                                  Delay),
-                    Pid0;
+                    econfig_watcher_sup:start_watcher(ConfName, IniFiles, Delay);
                 _ ->
-                    nil
+                    {ok, nil}
             end,
             Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
                                                   pid=Pid,
