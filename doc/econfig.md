@@ -5,8 +5,8 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-Public API of econfig.
+Public API of econfig
+econfig rely on a central gen_server and an ordered ets table.
 
 <a name="index"></a>
 
@@ -29,6 +29,7 @@ files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/
 `all(ConfigName) -> any()`
 
 get all values of a configuration
+
 <a name="cfg2list-1"></a>
 
 ### cfg2list/1 ###
@@ -36,6 +37,7 @@ get all values of a configuration
 `cfg2list(ConfigName) -> any()`
 
 retrive config as a proplist
+
 <a name="cfg2list-2"></a>
 
 ### cfg2list/2 ###
@@ -43,6 +45,7 @@ retrive config as a proplist
 `cfg2list(ConfigName, GroupKey) -> any()`
 
 retrieve config as a proplist
+
 <a name="delete_value-2"></a>
 
 ### delete_value/2 ###
@@ -50,6 +53,7 @@ retrieve config as a proplist
 `delete_value(ConfigName, Section) -> any()`
 
 delete a value
+
 <a name="delete_value-3"></a>
 
 ### delete_value/3 ###
@@ -57,6 +61,7 @@ delete a value
 `delete_value(ConfigName, Section, Key) -> any()`
 
 delete a value
+
 <a name="delete_value-4"></a>
 
 ### delete_value/4 ###
@@ -64,6 +69,7 @@ delete a value
 `delete_value(ConfigName, Section, Key, Persist) -> any()`
 
 delete a value
+
 <a name="get_value-2"></a>
 
 ### get_value/2 ###
@@ -71,6 +77,7 @@ delete a value
 `get_value(ConfigName, Section) -> any()`
 
 get values of a section
+
 <a name="get_value-3"></a>
 
 ### get_value/3 ###
@@ -78,12 +85,12 @@ get values of a section
 `get_value(ConfigName, Section, Key) -> any()`
 
 get value for a key in a section
+
 <a name="get_value-4"></a>
 
 ### get_value/4 ###
 
 `get_value(ConfigName, Section, Key, Default) -> any()`
-
 
 <a name="open_config-2"></a>
 
@@ -92,6 +99,7 @@ get value for a key in a section
 `open_config(ConfigName, IniFile) -> any()`
 
 open or create an ini file an register it
+
 <a name="open_config-3"></a>
 
 ### open_config/3 ###
@@ -100,6 +108,7 @@ open or create an ini file an register it
 
 open or create an ini file an register it. See the
 register_config function for a list of available functions.
+
 <a name="prefix-2"></a>
 
 ### prefix/2 ###
@@ -107,52 +116,43 @@ register_config function for a list of available functions.
 `prefix(ConfigName, Prefix) -> any()`
 
 get all sections starting by Prefix
+
 <a name="register_config-2"></a>
 
 ### register_config/2 ###
 
-
 <pre><code>
 register_config(ConfigName::term(), IniFiles::<a href="econfig.md#type-inifiles">econfig:inifiles()</a>) -&gt; ok | {error, any()}
 </code></pre>
-
-<br></br>
-
+<br />
 
 register inifiles or config dirs
+
 <a name="register_config-3"></a>
 
 ### register_config/3 ###
 
-
 <pre><code>
 register_config(ConfigName::term(), IniFiles::<a href="econfig.md#type-inifiles">econfig:inifiles()</a>, Options::<a href="econfig.md#type-options">econfig:options()</a>) -&gt; ok | {error, any()}
 </code></pre>
-
-<br></br>
-
-
+<br />
 
 register inifiles of config dirs with options
 For now the only option is`autoreload` to auto reload the config on
 files or dirs changes.
 Configs can also be registererd in the app configuration at startup:
 
-
-
 [confs, [{ConfigName, IniFile},
 {ConfigName1, IniFiles1, [Options]}, ..]]
 
-
-
 Options:
-
 
 - `autoreload`: auto reload the config on files or dirs changes
 - `{autoreload, Delay}`: autoreload the config file or dir
 changes. Delay set the time between each scan. Default is 5000
 and can be set using the `scan_delay` application environement
 for econfig.
+
 <a name="reload-1"></a>
 
 ### reload/1 ###
@@ -160,6 +160,7 @@ for econfig.
 `reload(ConfigName) -> any()`
 
 reload the configuration
+
 <a name="reload-2"></a>
 
 ### reload/2 ###
@@ -167,6 +168,7 @@ reload the configuration
 `reload(ConfigName, IniFiles) -> any()`
 
 reload the configuration
+
 <a name="sections-1"></a>
 
 ### sections/1 ###
@@ -174,6 +176,7 @@ reload the configuration
 `sections(ConfigName) -> any()`
 
 get all sections of a configuration
+
 <a name="set_value-3"></a>
 
 ### set_value/3 ###
@@ -181,6 +184,7 @@ get all sections of a configuration
 `set_value(ConfigName, Section, Value) -> any()`
 
 set a value
+
 <a name="set_value-4"></a>
 
 ### set_value/4 ###
@@ -188,12 +192,12 @@ set a value
 `set_value(ConfigName, Section, Key, Value) -> any()`
 
 set a value
+
 <a name="set_value-5"></a>
 
 ### set_value/5 ###
 
 `set_value(ConfigName, Section, Key, Value, Persist) -> any()`
-
 
 <a name="start-0"></a>
 
@@ -202,12 +206,12 @@ set a value
 `start() -> any()`
 
 Start the couchbeam process. Useful when testing using the shell.
+
 <a name="start_autoreload-1"></a>
 
 ### start_autoreload/1 ###
 
 `start_autoreload(ConfigName) -> any()`
-
 
 <a name="stop-0"></a>
 
@@ -216,12 +220,12 @@ Start the couchbeam process. Useful when testing using the shell.
 `stop() -> any()`
 
 Stop the couchbeam process. Useful when testing using the shell.
+
 <a name="stop_autoreload-1"></a>
 
 ### stop_autoreload/1 ###
 
 `stop_autoreload(ConfigName) -> any()`
-
 
 <a name="subscribe-1"></a>
 
@@ -229,13 +233,9 @@ Stop the couchbeam process. Useful when testing using the shell.
 
 `subscribe(ConfigName) -> any()`
 
-
 Subscribe to config events for a config named `ConfigName`
 
-
-
 The message received to each subscriber will be of the form:
-
 
 `{config_updated, ConfigName, {Section, Key}}`
 
@@ -243,15 +243,13 @@ The message received to each subscriber will be of the form:
 
 ### unregister_config/1 ###
 
-
 <pre><code>
 unregister_config(ConfigName::term()) -&gt; ok
 </code></pre>
-
-<br></br>
-
+<br />
 
 unregister a conf
+
 <a name="unsubscribe-1"></a>
 
 ### unsubscribe/1 ###

@@ -1,5 +1,3 @@
 %% encoding: UTF-8
 {application,econfig}.
-{packages,[]}.
-{modules,[econfig,econfig_app,econfig_deps,econfig_file_writer,econfig_server,
-          econfig_sup,econfig_util,econfig_watcher,econfig_watcher_sup]}.
+{modules,[econfig]}.

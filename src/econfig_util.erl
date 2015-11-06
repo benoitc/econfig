@@ -3,6 +3,8 @@
 %%% This file is part of econfig released under the Apache 2 license.
 %%% See the NOTICE for more information.
 
+%%  @hidden
+
 -module(econfig_util).
 
 -export([find_ini_files/1,

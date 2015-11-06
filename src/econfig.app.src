@@ -4,11 +4,16 @@
 {application, econfig,
  [
   {description, "simple Erlang config handler using INI files"},
-  {vsn, "0.4.2"},
+  {vsn, "0.5.0"},
   {registered, []},
   {applications, [kernel,
                   stdlib,
                   gproc]},
   {mod, { econfig_app, []}},
-  {env, []}
+  {env, []},
+
+  {maintainers, ["Benoit Chesneau"]},
+  {license, ["Apache License 2"]},
+  {links, [{"Github", "https://github.com/benoitc/econfig"}]}
+
  ]}.

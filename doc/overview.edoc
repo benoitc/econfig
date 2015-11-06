@@ -18,9 +18,7 @@
 @version 0.4.2
 @title econfig - simple Erlang config handler using INI files
 
-@doc
-
-# econfig
+@doc # econfig
 
 econfig is a simple Erlang config handler to manage a config from INI
 files.
@@ -35,10 +33,13 @@ manage changes from a full config directory.
 See the [NEWS](http://github.com/benoitc/econfig/blob/master/NEWS.md)
 for last changes.
 
+#### Useful modules are:
+
+- {@link econfig}: main module. It contains all the API.
+
 ## Examples
 
 Quick usage example:
-
 
 ```
 1> application:start(gproc).

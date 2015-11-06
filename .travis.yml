@@ -1,0 +1,13 @@
+language: erlang
+otp_release:
+   - R16B03-1
+   - 17.0
+   - 17.1
+   - 18.0
+   - 18.1
+before_script:
+  - "./test/bootstrap_travis.sh"
+script: "./rebar3 eunit"
+notifications:
+  irc:
+    - "irc.freenode.org#refuge.io"

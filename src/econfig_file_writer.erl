@@ -3,6 +3,8 @@
 %%% This file is part of econfig released under the Apache 2 license.
 %%% See the NOTICE for more information.
 
+%%  @hidden
+
 -module(econfig_file_writer).
 
 -export([save_to_file/2]).
