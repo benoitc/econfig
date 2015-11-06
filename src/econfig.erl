@@ -330,7 +330,7 @@ subscribe_test_() ->
       fun() ->
           ResultSubscribe = econfig:subscribe(t),
           ResultUnsubscribe = econfig:unsubscribe(t),
-          ?assertEqual([true, true], [ResultSubscribe, ResultUnsubscribe])
+          ?assertEqual([ok, ok], [ResultSubscribe, ResultUnsubscribe])
       end,
       % test subscribe update
       fun() ->

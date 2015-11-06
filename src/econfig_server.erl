@@ -83,13 +83,23 @@ open_config(ConfigName, IniFile, Options) ->
 %%
 %% @end
 subscribe(ConfigName) ->
-    gproc:reg({p,l,{config_updated, ConfigName}}).
+    Key = {sub, ConfigName, self()},
+    case ets:insert_new(?TAB, {Key, self()}) of
+        false -> ok;
+        true ->
+            ets:insert(?TAB, {{self(), ConfigName}, Key}),
+            %% maybe monitor the process
+            case ets:insert_new(?TAB, {self(), m}) of
+                false -> ok;
+                true ->
+                    gen_server:cast(?MODULE, {monitor_sub, self()})
+            end
+    end.
 
 %% @doc Remove subscribtion created using `subscribe(ConfigName)'
-%%
-%% @end
 unsubscribe(ConfigName) ->
-    gproc:unreg({p,l,{config_updated, ConfigName}}).
+    gen_server:call(?MODULE, {unsub, ConfigName}).
+
 
 %% @doc reload the configuration
 reload(ConfigName) ->
@@ -382,8 +392,8 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
             lists:foreach(fun({Key,Value}) ->
                                   Value1 = econfig_util:trim_whitespace(Value),
                                   if
-                                      Value1 =/= [] ->
-                                          true = ets:insert(?TAB, {{conf_key(ConfName), Section,Key}, Value1});
+                                      Value1 /= [] ->
+                                          true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1});
                                       true ->
                                           true = ets:delete(?TAB, {conf_key(ConfName), Section, Key})
                                   end
@@ -428,11 +438,29 @@ handle_call({mdel, {ConfName, Section, Persist}}, _From,
     notify_change(ConfName, delete, Section),
     {reply, ok, State};
 
+handle_call({unsub, ConfName}, {Pid, _}, State) ->
+    Key = {sub, ConfName, Pid},
+    case ets:lookup(?TAB, Key) of
+        [{Key, Pid}] ->
+            _ = ets:delete(?TAB, Key);
+        [] -> ok
+    end,
+    {reply, ok, State};
+
 handle_call(_Msg, _From, State) ->
     {reply, ok, State}.
 
+handle_cast({monitor_sub, Pid}, State) ->
+    erlang:monitor(process, Pid),
+    {noreply, State};
+
 handle_cast(_Msg, State) ->
     {noreply, State}.
+
+
+handle_info({'DOWN', _MRef, process, Pid, _}, State) ->
+    _ = process_is_down(Pid),
+    {noreply, State};
 
 handle_info(_Info, State) ->
     {noreply, State}.
@@ -459,16 +487,19 @@ maybe_pause(_, Fun) ->
     Fun().
 
 notify_change(ConfigName, Type) ->
-    gproc:send({p, l, {config_updated, ConfigName}},
-               {config_updated, ConfigName, Type}).
+    send(ConfigName, {config_updated, ConfigName, Type}).
 
 notify_change(ConfigName, Type, Section) ->
-    gproc:send({p, l, {config_updated, ConfigName}},
-               {config_updated, ConfigName, {Type, Section}}).
+    send(ConfigName, {config_updated, ConfigName, {Type, Section}}).
 
 notify_change(ConfigName, Type, Section, Key) ->
-    gproc:send({p, l, {config_updated, ConfigName}},
-               {config_updated, ConfigName, {Type, {Section, Key}}}).
+    send(ConfigName, {config_updated, ConfigName, {Type, {Section, Key}}}).
+
+send(ConfigName, Msg) ->
+    Subs = ets:select(?TAB, [{{{sub, ConfigName, '_'}, '$1'}, [], ['$1']}]),
+    lists:foreach(fun(Pid) ->
+        catch Pid ! Msg
+    end, Subs).
 
 
 initialize_app_confs() ->
@@ -586,3 +617,18 @@ parse_ini_file(ConfName, IniFile) ->
             end
         end, {"", [], []}, Lines),
     {ok, ParsedIniValues, DeleteIniKeys}.
+
+process_is_down(Pid) when is_pid(Pid) ->
+    case ets:member(?TAB, Pid) of
+        false ->
+            ok;
+        true ->
+            Subs = ets:select(?TAB, [{{{Pid, '$1'}, '$2'}, [], [{{'$1', '$2'}}]}]),
+            lists:foreach(fun({ConfName, SubKey}) ->
+                    ets:delete(?TAB, {Pid, ConfName}),
+                    ets:delete(?TAB, SubKey)
+                end, Subs),
+
+            ets:delete(?TAB, Pid),
+            ok
+    end.
