@@ -265,25 +265,25 @@ init(_) ->
 handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
             #state{confs=Confs}=State) ->
     {Resp, NewState} =
-        try
-            WriteFile = parse_inis(ConfName, IniFiles),
-            {ok, Pid} = case proplists:get_value(autoreload, Options) of
-                true -> 
-                    econfig_watcher_sup:start_watcher(ConfName, IniFiles);
-                Delay when is_integer(Delay) ->
-                    econfig_watcher_sup:start_watcher(ConfName, IniFiles, Delay);
-                _ ->
-                    {ok, nil}
-            end,
-            Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
-                                                  pid=Pid,
-                                                  options=Options,
-                                                  inifiles=IniFiles},
-                                Confs),
-            {ok, State#state{confs=Confs1}}
-        catch _Tag:Error ->
-            {{error, Error}, State}
-        end,
+    try
+        WriteFile = parse_inis(ConfName, IniFiles),
+        {ok, Pid} = case proplists:get_value(autoreload, Options) of
+                        true ->
+                            econfig_watcher_sup:start_watcher(ConfName, IniFiles);
+                        Delay when is_integer(Delay) ->
+                            econfig_watcher_sup:start_watcher(ConfName, IniFiles, Delay);
+                        _ ->
+                            {ok, nil}
+                    end,
+        Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
+                                              pid=Pid,
+                                              options=Options,
+                                              inifiles=IniFiles},
+                            Confs),
+        {ok, State#state{confs=Confs1}}
+    catch _Tag:Error ->
+              {{error, Error}, State}
+    end,
     {reply, Resp, NewState};
 
 handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
@@ -370,25 +370,24 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
 handle_call({mset, {ConfName, Section, List, Persist}}, _From,
             #state{confs=Confs}=State) ->
     Result = case {Persist, dict:find(ConfName, Confs)} of
-        {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
-            maybe_pause(Conf, fun() ->
-                econfig_file_writer:save_to_file({Section, List}, FileName)
-            end);
-        _ ->
-            ok
-    end,
+                 {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
+                     maybe_pause(Conf, fun() ->
+                                               econfig_file_writer:save_to_file({Section, List}, FileName)
+                                       end);
+                 _ ->
+                     ok
+             end,
     case Result of
         ok ->
-            lists:foreach(
-                fun({Key,Value}) ->
-                    Value1 = econfig_util:trim_whitespace(Value),
-                    if
-                        Value1 =/= [] ->
-                            true = ets:insert(?TAB, {{conf_key(ConfName), Section,Key}, Value1});
-                        true ->
-                            true = ets:delete(?TAB, {conf_key(ConfName), Section, Key})
-                    end
-                end, List),
+            lists:foreach(fun({Key,Value}) ->
+                                  Value1 = econfig_util:trim_whitespace(Value),
+                                  if
+                                      Value1 =/= [] ->
+                                          true = ets:insert(?TAB, {{conf_key(ConfName), Section,Key}, Value1});
+                                      true ->
+                                          true = ets:delete(?TAB, {conf_key(ConfName), Section, Key})
+                                  end
+                          end, List),
             notify_change(ConfName, set, Section),
             {reply, ok, State};
         _Error ->
@@ -403,8 +402,8 @@ handle_call({del, {ConfName, Section, Key, Persist}}, _From,
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
             maybe_pause(Conf, fun() ->
-                econfig_file_writer:save_to_file({Section, [{Key, ""}]}, FileName)
-            end);
+                                      econfig_file_writer:save_to_file({Section, [{Key, ""}]}, FileName)
+                              end);
         _ ->
             ok
     end,
@@ -414,15 +413,15 @@ handle_call({mdel, {ConfName, Section, Persist}}, _From,
             #state{confs=Confs}=State) ->
     Matches = ets:match(?TAB, {{conf_key(ConfName), Section, '$1'}, '$2'}),
     ToDelete = lists:foldl(fun([Key, _Val], Acc) ->
-                    true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
-                    [{Key, ""} | Acc]
-            end, [], Matches),
+                                   true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
+                                   [{Key, ""} | Acc]
+                           end, [], Matches),
 
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
             maybe_pause(Conf, fun() ->
-                econfig_file_writer:save_to_file({Section, ToDelete}, FileName)
-            end);
+                                      econfig_file_writer:save_to_file({Section, ToDelete}, FileName)
+                              end);
         _ ->
             ok
     end,
