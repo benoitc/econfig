@@ -35,7 +35,10 @@
                  options,
                  inifiles}).
 
+-define(TAB, econfig).
+
 start_link() ->
+    _ = init_tabs(),
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 -spec register_config(term(), econfig:inifiles()) -> ok | {error,
@@ -105,18 +108,18 @@ stop_autoreload(ConfigName) ->
 
 %% @doc get all values of a configuration
 all(ConfigName) ->
-    Matches = ets:match(?MODULE, {{conf_key(ConfigName), '$1', '$2'}, '$3'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfigName), '$1', '$2'}, '$3'}),
     [{Section, Key, Value} || [Section, Key, Value] <- Matches].
 
 %% @doc get all sections of a configuration
 sections(ConfigName) ->
-    Matches = ets:match(?MODULE, {{conf_key(ConfigName), '$1', '_'}, '_'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfigName), '$1', '_'}, '_'}),
     lists:umerge(Matches).
 
 
 %% @doc get all sections starting by Prefix
 prefix(ConfigName, Prefix) ->
-    Matches = ets:match(?MODULE, {{conf_key(ConfigName), '$1', '_'}, '_'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfigName), '$1', '_'}, '_'}),
     Found = lists:foldl(fun([Match], Acc) ->
                     case re:split(Match, Prefix, [{return,list}]) of
                         [Match] -> Acc;
@@ -131,7 +134,7 @@ prefix(ConfigName, Prefix) ->
 
 %% @doc retrive config as a proplist
 cfg2list(ConfigName) ->
-    Matches = ets:match(?MODULE, {{conf_key(ConfigName), '$1', '$2'}, '$3'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfigName), '$1', '$2'}, '$3'}),
     lists:foldl(fun([Section, Key, Value], Props) ->
                 case lists:keyfind(Section, 1, Props) of
                     false ->
@@ -144,7 +147,7 @@ cfg2list(ConfigName) ->
 
 %% @doc retrieve config as a proplist
 cfg2list(ConfigName, GroupKey) ->
-    Matches = ets:match(?MODULE, {{conf_key(ConfigName), '$1', '$2'}, '$3'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfigName), '$1', '$2'}, '$3'}),
     lists:foldl(fun([Section, Key, Value], Props) ->
                 case re:split(Section, GroupKey, [{return,list}]) of
                     [Section] ->
@@ -180,7 +183,7 @@ cfg2list(ConfigName, GroupKey) ->
 %% @doc get values of a section
 get_value(ConfigName, Section0) ->
     Section = econfig_util:to_list(Section0),
-    Matches = ets:match(?MODULE, {{conf_key(ConfigName), Section, '$1'}, '$2'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfigName), Section, '$1'}, '$2'}),
     [{Key, Value} || [Key, Value] <- Matches].
 
 %% @doc get value for a key in a section
@@ -191,7 +194,7 @@ get_value(ConfigName, Section0, Key0, Default) ->
     Section = econfig_util:to_list(Section0),
     Key = econfig_util:to_list(Key0),
 
-    case ets:lookup(?MODULE, {conf_key(ConfigName), Section, Key}) of
+    case ets:lookup(?TAB, {conf_key(ConfigName), Section, Key}) of
         [] -> Default;
         [{_, Match}] -> Match
     end.
@@ -240,6 +243,15 @@ delete_value(ConfigName, Section0, Key0, Persist) ->
                                     Persist}}, infinity).
 
 
+init_tabs() ->
+    case ets:info(?TAB, name) of
+        undefined ->
+            ets:new(?TAB, [ordered_set, public, named_table,
+                           {read_concurrency, true},
+                           {write_concurrency, true}]);
+        _ ->
+            true
+    end.
 
 %% -----------------------------------------------
 %% gen_server callbacks
@@ -247,7 +259,6 @@ delete_value(ConfigName, Section0, Key0, Persist) ->
 
 init(_) ->
     process_flag(trap_exit, true),
-    ets:new(?MODULE, [named_table, set, protected]),
     InitialState = initialize_app_confs(),
     {ok, InitialState}.
 
@@ -276,7 +287,7 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
     {reply, Resp, NewState};
 
 handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
-    true = ets:match_delete(?MODULE, {{conf_key(ConfName), '_', '_'}, '_'}),
+    true = ets:match_delete(?TAB, {{conf_key(ConfName), '_', '_'}, '_'}),
     case dict:find(ConfName, Confs) of
         {ok, #config{pid=Pid}} when is_pid(Pid) ->
             supervisor:terminate_child(econfig_watcher_sup, Pid);
@@ -291,7 +302,7 @@ handle_call({reload, {ConfName, IniFiles0}}, _From,
     case dict:find(ConfName, Confs) of
         {ok, #config{inifiles=IniFiles1, options=Options}=Conf} ->
 
-            true = ets:match_delete(?MODULE, {{conf_key(ConfName), '_', '_'}, '_'}),
+            true = ets:match_delete(?TAB, {{conf_key(ConfName), '_', '_'}, '_'}),
             IniFiles = case IniFiles0 of
                 nil -> IniFiles1;
                 _ -> IniFiles0
@@ -347,9 +358,9 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
             Value1 = econfig_util:trim_whitespace(Value),
             case Value1 of
                 [] ->
-                    true = ets:delete(?MODULE, {conf_key(ConfName), Section, Key});
+                    true = ets:delete(?TAB, {conf_key(ConfName), Section, Key});
                 _ ->
-                    true = ets:insert(?MODULE, {{conf_key(ConfName), Section, Key}, Value1})
+                    true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1})
             end,
             notify_change(ConfName, set, Section, Key),
             {reply, ok, State};
@@ -373,9 +384,9 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
                     Value1 = econfig_util:trim_whitespace(Value),
                     case Value1 of
                         [] ->
-                            true = ets:delete(?MODULE, {conf_key(ConfName), Section, Key});
+                            true = ets:delete(?TAB, {conf_key(ConfName), Section, Key});
                         _ ->
-                            true = ets:insert(?MODULE, {{conf_key(ConfName), Section,Key}, Value1})
+                            true = ets:insert(?TAB, {{conf_key(ConfName), Section,Key}, Value1})
                     end
                 end, List),
             notify_change(ConfName, set, Section),
@@ -387,7 +398,7 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
 handle_call({del, {ConfName, Section, Key, Persist}}, _From,
             #state{confs=Confs}=State) ->
 
-    true = ets:delete(?MODULE, {conf_key(ConfName), Section, Key}),
+    true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
 
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
@@ -402,10 +413,10 @@ handle_call({del, {ConfName, Section, Key, Persist}}, _From,
     {reply, ok, State};
 handle_call({mdel, {ConfName, Section, Persist}}, _From,
             #state{confs=Confs}=State) ->
-    Matches = ets:match(?MODULE, {{conf_key(ConfName), Section, '$1'}, '$2'}),
+    Matches = ets:match(?TAB, {{conf_key(ConfName), Section, '$1'}, '$2'}),
     ToDelete = lists:foldl(fun([Key, _Val], Acc) ->
 
-                    true = ets:delete(?MODULE, {conf_key(ConfName), Section, Key}),
+                    true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
                     [{Key, ""} | Acc]
             end, [], Matches),
 
@@ -503,8 +514,8 @@ parse_inis(ConfName, IniFiles0) ->
     IniFiles = econfig_util:find_files(IniFiles0),
     lists:map(fun(IniFile) ->
                 {ok, ParsedIniValues, DelKeys} = parse_ini_file(ConfName, IniFile),
-                ets:insert(?MODULE, ParsedIniValues),
-                lists:foreach(fun(Key) -> ets:delete(?MODULE, Key) end, DelKeys)
+                ets:insert(?TAB, ParsedIniValues),
+                lists:foreach(fun(Key) -> ets:delete(?TAB, Key) end, DelKeys)
         end, IniFiles),
     WriteFile = lists:last(IniFiles),
     WriteFile.
