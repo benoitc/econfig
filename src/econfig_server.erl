@@ -347,9 +347,9 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
 
     Result = case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
-            pause_autoreload(Conf),
-            econfig_file_writer:save_to_file({Section, [{Key, Value}]}, FileName),
-            restart_autoreload(Conf);
+            maybe_pause(Conf, fun() ->
+                econfig_file_writer:save_to_file({Section, [{Key, Value}]}, FileName)
+            end);
         _ ->
             ok
     end,
@@ -371,9 +371,9 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
             #state{confs=Confs}=State) ->
     Result = case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
-            pause_autoreload(Conf),
-            econfig_file_writer:save_to_file({Section, List}, FileName),
-            restart_autoreload(Conf);
+            maybe_pause(Conf, fun() ->
+                econfig_file_writer:save_to_file({Section, List}, FileName)
+            end);
         _ ->
             ok
     end,
@@ -382,11 +382,11 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
             lists:foreach(
                 fun({Key,Value}) ->
                     Value1 = econfig_util:trim_whitespace(Value),
-                    case Value1 of
-                        [] ->
-                            true = ets:delete(?TAB, {conf_key(ConfName), Section, Key});
-                        _ ->
-                            true = ets:insert(?TAB, {{conf_key(ConfName), Section,Key}, Value1})
+                    if
+                        Value1 =/= [] ->
+                            true = ets:insert(?TAB, {{conf_key(ConfName), Section,Key}, Value1});
+                        true ->
+                            true = ets:delete(?TAB, {conf_key(ConfName), Section, Key})
                     end
                 end, List),
             notify_change(ConfName, set, Section),
@@ -402,10 +402,9 @@ handle_call({del, {ConfName, Section, Key, Persist}}, _From,
 
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
-            pause_autoreload(Conf),
-            econfig_file_writer:save_to_file({Section, [{Key, ""}]},
-                                             FileName),
-            restart_autoreload(Conf);
+            maybe_pause(Conf, fun() ->
+                econfig_file_writer:save_to_file({Section, [{Key, ""}]}, FileName)
+            end);
         _ ->
             ok
     end,
@@ -415,16 +414,15 @@ handle_call({mdel, {ConfName, Section, Persist}}, _From,
             #state{confs=Confs}=State) ->
     Matches = ets:match(?TAB, {{conf_key(ConfName), Section, '$1'}, '$2'}),
     ToDelete = lists:foldl(fun([Key, _Val], Acc) ->
-
                     true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
                     [{Key, ""} | Acc]
             end, [], Matches),
 
     case {Persist, dict:find(ConfName, Confs)} of
         {true, {ok, #config{write_file=FileName}=Conf}} when FileName /= nil->
-            pause_autoreload(Conf),
-            econfig_file_writer:save_to_file({Section, ToDelete}, FileName),
-            restart_autoreload(Conf);
+            maybe_pause(Conf, fun() ->
+                econfig_file_writer:save_to_file({Section, ToDelete}, FileName)
+            end);
         _ ->
             ok
     end,
@@ -454,16 +452,12 @@ conf_key(Name) -> {c, Name}.
 %% -----------------------------------------------
 %%
 
-pause_autoreload(#config{pid=Pid}) when is_pid(Pid) ->
-    econfig_watcher:pause(Pid);
-pause_autoreload(_) ->
-    ok.
-
-restart_autoreload(#config{pid=Pid}) when is_pid(Pid) ->
+maybe_pause(#config{pid=Pid}, Fun) when is_pid(Pid) ->
+    econfig_watcher:pause(Pid),
+    Fun(),
     econfig_watcher:restart(Pid);
-restart_autoreload(_) ->
-    ok.
-
+maybe_pause(_, Fun) ->
+    Fun().
 
 notify_change(ConfigName, Type) ->
     gproc:send({p, l, {config_updated, ConfigName}},
@@ -491,14 +485,11 @@ initialize_app_confs1([{ConfName, IniFiles} | Rest], State) ->
 initialize_app_confs1([{ConfName, IniFiles, Options} | Rest],
                       #state{confs=Confs}=State) ->
     WriteFile = parse_inis(ConfName, IniFiles),
-    Pid = case proplists:get_value(autoreload, Options) of
+    {ok, Pid} = case proplists:get_value(autoreload, Options) of
         true ->
-            {ok, Pid0} =
-                        econfig_watcher_sup:start_watcher(ConfName,
-                                                          IniFiles),
-            Pid0;
+            econfig_watcher_sup:start_watcher(ConfName, IniFiles);
         _ ->
-            nil
+            {ok, nil}
     end,
     Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
                                           pid=Pid,
