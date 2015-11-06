@@ -178,6 +178,18 @@ cleanup(_State) ->
     error_logger:tty(true),
     ok = file:delete(fixture_path("local.ini")).
 
+setup_change_fun() ->
+    setup_common(),
+    ets:new(econfig_test, [named_table, public]),
+    ChangeFun = fun(Change) ->
+                    ets:insert(econfig_test, Change)
+                end,
+    ok = econfig:register_config(t, [fixture_path("test.ini"), fixture_path("local.ini")], [{change_fun, ChangeFun}]).
+
+cleanup_change_fun(State) ->
+    ets:delete(econfig_test),
+    cleanup(State).
+
 parse_test_() ->
     {setup,
      fun setup/0,
@@ -364,6 +376,24 @@ subscribe_test_() ->
                   false
           end,
           ?assertEqual(false, Result)
+      end
+     ]}.
+
+change_fun_test_() ->
+    {setup,
+     fun setup_change_fun/0,
+     fun cleanup_change_fun/1,
+     [% test update
+      fun() ->
+          econfig:set_value(t, "section 2", "key666", "value666"),
+          Changes = ets:tab2list(econfig_test),
+          ?assertEqual([{config_updated, t, {set, {"section 2", "key666"}}}], Changes)
+      end,
+      % test subscribe delete
+      fun() ->
+          econfig:delete_value(t, "section 2", "key6"),
+          Changes = ets:tab2list(econfig_test),
+          ?assertEqual([{config_updated, t, {delete, {"section 2", "key6"}}}], Changes)
       end
      ]}.
 -endif.

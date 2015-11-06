@@ -32,6 +32,7 @@
 -record(state, {confs = dict:new()}).
 -record(config, {write_file=nil,
                  pid=nil,
+                 change_fun,
                  options,
                  inifiles}).
 
@@ -285,8 +286,12 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
                         _ ->
                             {ok, nil}
                     end,
+
+        ChangeFun = proplists:get_value(change_fun, Options, fun(_Change) -> ok end),
+        ok = check_fun(ChangeFun),
         Confs1 = dict:store(ConfName, #config{write_file=WriteFile,
                                               pid=Pid,
+                                              change_fun=ChangeFun,
                                               options=Options,
                                               inifiles=IniFiles},
                             Confs),
@@ -324,7 +329,7 @@ handle_call({reload, {ConfName, IniFiles0}}, _From,
                                                       options=Options,
                                                       inifiles=IniFiles},
                                 Confs),
-            notify_change(ConfName, reload),
+            notify_change(State, ConfName, reload),
             {reply, ok, State#state{confs=Confs1}};
         _ ->
             {reply, ok, State}
@@ -372,7 +377,7 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
                 _ ->
                     true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1})
             end,
-            notify_change(ConfName, set, Section, Key),
+            notify_change(State, ConfName, set, Section, Key),
             {reply, ok, State};
         _Error ->
             {reply, Result, State}
@@ -398,7 +403,7 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
                                           true = ets:delete(?TAB, {conf_key(ConfName), Section, Key})
                                   end
                           end, List),
-            notify_change(ConfName, set, Section),
+            notify_change(State, ConfName, set, Section),
             {reply, ok, State};
         _Error ->
             {reply, Result, State}
@@ -417,7 +422,7 @@ handle_call({del, {ConfName, Section, Key, Persist}}, _From,
         _ ->
             ok
     end,
-    notify_change(ConfName, delete, Section, Key),
+    notify_change(State, ConfName, delete, Section, Key),
     {reply, ok, State};
 handle_call({mdel, {ConfName, Section, Persist}}, _From,
             #state{confs=Confs}=State) ->
@@ -435,7 +440,7 @@ handle_call({mdel, {ConfName, Section, Persist}}, _From,
         _ ->
             ok
     end,
-    notify_change(ConfName, delete, Section),
+    notify_change(State, ConfName, delete, Section),
     {reply, ok, State};
 
 handle_call({unsub, ConfName}, {Pid, _}, State) ->
@@ -486,20 +491,34 @@ maybe_pause(#config{pid=Pid}, Fun) when is_pid(Pid) ->
 maybe_pause(_, Fun) ->
     Fun().
 
-notify_change(ConfigName, Type) ->
-    send(ConfigName, {config_updated, ConfigName, Type}).
+notify_change(State, ConfigName, Type) ->
+    Msg = {config_updated, ConfigName, Type},
+    run_change_fun(State, ConfigName, Msg),
+    send(ConfigName, Msg).
 
-notify_change(ConfigName, Type, Section) ->
-    send(ConfigName, {config_updated, ConfigName, {Type, Section}}).
+notify_change(State, ConfigName, Type, Section) ->
+    Msg = {config_updated, ConfigName, {Type, Section}},
+    run_change_fun(State, ConfigName, Msg),
+    send(ConfigName, Msg).
 
-notify_change(ConfigName, Type, Section, Key) ->
-    send(ConfigName, {config_updated, ConfigName, {Type, {Section, Key}}}).
+notify_change(State, ConfigName, Type, Section, Key) ->
+    Msg = {config_updated, ConfigName, {Type, {Section, Key}}},
+    run_change_fun(State, ConfigName, Msg),
+    send(ConfigName, Msg).
 
 send(ConfigName, Msg) ->
     Subs = ets:select(?TAB, [{{{sub, ConfigName, '_'}, '$1'}, [], ['$1']}]),
     lists:foreach(fun(Pid) ->
         catch Pid ! Msg
     end, Subs).
+
+run_change_fun(State, ConfigName, Msg) ->
+    {ok, #config{change_fun=ChangeFun}} = dict:find(ConfigName, State#state.confs),
+    case ChangeFun of
+        none -> ok;
+        {M, F} -> apply(M, F, [Msg]);
+        F -> F(Msg)
+    end.
 
 
 initialize_app_confs() ->
@@ -631,4 +650,18 @@ process_is_down(Pid) when is_pid(Pid) ->
 
             ets:delete(?TAB, Pid),
             ok
+    end.
+
+check_fun(none) ->
+    ok;
+check_fun(Fun) when is_function(Fun) ->
+    case erlang:fun_info(Fun, arity) of
+        {arity, 1} -> ok;
+        _ -> badarg
+    end;
+check_fun({Mod, Fun}) when is_atom(Mod), is_function(Fun) ->
+    _ = code:ensure_loaded(Mod),
+    case erlang:function_exported(Mod, Fun, 1) of
+        true -> ok;
+        false -> badarg
     end.
