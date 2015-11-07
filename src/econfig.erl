@@ -20,6 +20,13 @@
          set_value/3, set_value/4, set_value/5,
          delete_value/2, delete_value/3, delete_value/4]).
 
+%% helper functions
+-export([get_boolean/3, get_boolean/4,
+         get_integer/3, get_integer/4,
+         get_float/3, get_float/4,
+         get_list/3, get_list/4,
+         get_binary/3, get_binary/4]).
+
 -type conf() :: atom() | string() | binary().
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
@@ -181,6 +188,135 @@ delete_value(ConfigName, Section, Key) ->
 delete_value(ConfigName, Section, Key, Persist) ->
     econfig_server:delete_value(ConfigName, Section, Key, Persist).
 
+%% @doc get a value and convert it to a boolean if possible
+%% This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
+%% a badarg error is raised if the value can't be parsed to a boolean
+-spec get_boolean(ConfigName::conf(), Section::section(), Key::key()) -> Value::boolean() | undefined.
+get_boolean(ConfigName, Section, Key) ->
+    case get_value(ConfigName, Section, Key) of
+        undefined -> undefined;
+        Val -> to_boolean(Val)
+    end.
+
+%% @doc get a value and convert it to a boolean if possible. It fallback to default if not set.
+%% This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
+%% a badarg error is raised if the value can't be parsed to a boolean
+-spec get_boolean(ConfigName::conf(), Section::section(), Key::key(), Default::boolean()) -> Value::boolean().
+get_boolean(ConfigName, Section, Key, Default) when is_boolean(Default) ->
+    case get_boolean(ConfigName, Section, Key) of
+        undefined -> Default;
+        Val -> Val
+    end.
+
+%% @doc get a value and convert it to an integer
+-spec get_integer(ConfigName::conf(), Section::section(), Key::key()) -> Value::integer() | undefined.
+get_integer(ConfigName, Section, Key) ->
+    case get_value(ConfigName, Section, Key) of
+        undefined -> undefined;
+        Val -> to_int(Val)
+    end.
+
+%% @doc get a value and convert it to an integer
+-spec get_integer(ConfigName::conf(), Section::section(), Key::key(), Default::integer()) -> Value::integer().
+get_integer(ConfigName, Section, Key, Default) when is_integer(Default) ->
+    case get_integer(ConfigName, Section, Key) of
+        undefined -> Default;
+        IVal -> IVal
+    end.
+
+%% @doc get a value and convert it to an float
+-spec get_float(ConfigName::conf(), Section::section(), Key::key()) -> Value::float() | undefined.
+get_float(ConfigName, Section, Key) ->
+    case get_value(ConfigName, Section, Key) of
+        undefined -> undefined;
+        Val -> to_float(Val)
+    end.
+
+%% @doc get a value and convert it to an float
+-spec get_float(ConfigName::conf(), Section::section(), Key::key(), Default::float()) -> Value::float().
+get_float(ConfigName, Section, Key, Default) when is_float(Default) ->
+    case get_float(ConfigName, Section, Key) of
+        undefined -> Default;
+        IVal -> IVal
+    end.
+
+%% @doc get a value and convert it to an float
+-spec get_list(ConfigName::conf(), Section::section(), Key::key()) -> Value::list() | undefined.
+get_list(ConfigName, Section, Key) ->
+    case get_value(ConfigName, Section, Key) of
+        undefined -> undefined;
+        Val -> to_list(Val)
+    end.
+
+%% @doc get a value and convert it to an float
+-spec get_list(ConfigName::conf(), Section::section(), Key::key(), Default::list()) -> Value::list().
+get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
+    case get_list(ConfigName, Section, Key) of
+        undefined -> Default;
+        LVal -> LVal
+    end.
+
+%% @doc get a value and convert it to an float
+-spec get_binary(ConfigName::conf(), Section::section(), Key::key()) -> Value::binary() | undefined.
+get_binary(ConfigName, Section, Key) ->
+    case get_value(ConfigName, Section, Key) of
+        undefined -> undefined;
+        Val -> to_binary(Val)
+    end.
+
+%% @doc get a value and convert it to an float
+-spec get_binary(ConfigName::conf(), Section::section(), Key::key(), Default::binary()) -> Value::binary().
+get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
+    case get_binary(ConfigName, Section, Key) of
+        undefined -> Default;
+        LVal -> LVal
+    end.
+
+
+to_boolean(Val) ->
+    case string:to_lower(Val) of
+        "true" -> true;
+        "false" -> false;
+        "1" -> true;
+        "0" -> false;
+        "on" -> true;
+        "off" -> false;
+        "yes" -> true;
+        "no" -> false;
+        undefined -> undefined;
+        _ -> 
+            throw(badarg)
+    end.
+
+to_int(Val) ->
+    case string:to_integer(Val) of
+        {IVal, []} -> IVal;
+        _ -> throw(badarg)
+    end.
+
+to_float(Val) ->
+    case string:to_float(Val) of
+        {FVal, []} -> FVal;
+        _ -> throw(badarg)
+    end.
+
+to_list("") -> [];
+to_list(Val) ->
+    lists:filtermap(fun(V) ->
+        case string:strip(V) of
+            "" -> false;
+            V2 -> {true, V2}
+        end
+    end, string:tokens(Val, ",")).
+
+to_binary(Val) ->
+    try list_to_binary(Val) of
+        Bin ->  Bin
+    catch
+        _ -> throw(badarg)
+    end.
+
+
 -ifdef(TEST).
 
 -include_lib("eunit/include/eunit.hrl").
@@ -226,7 +362,7 @@ parse_test_() ->
     {setup,
      fun setup/0,
      fun cleanup/1,
-     [?_assertEqual(lists:sort(["section1", "section 2", "section3"]), lists:sort(econfig:sections(t))),
+     [?_assertEqual(lists:sort(["section1", "section 2", "section3", "section4"]), lists:sort(econfig:sections(t))),
       ?_assertEqual("value1", econfig:get_value(t, "section1", "key1")),
       ?_assertEqual("value 2", econfig:get_value(t, "section1", "key2")),
       ?_assertEqual("value 3", econfig:get_value(t, "section1", "key 3")),
@@ -428,4 +564,21 @@ change_fun_test_() ->
           ?assertEqual([{config_updated, t, {delete, {"section 2", "key6"}}}], Changes)
       end
      ]}.
+
+parse_with_helpers_test_() ->
+    {setup,
+         fun setup/0,
+         fun cleanup/1,
+         [?_assertEqual(1, econfig:get_integer(t, "section4", "key1")),
+          ?_assertEqual(undefined, econfig:get_integer(t, "section4", "key11")),
+          ?_assertEqual(badarg, (catch econfig:get_integer(t, "section4", "key2"))),
+          ?_assertEqual(11, econfig:get_integer(t, "section4", "key11", 11)),
+          ?_assertEqual(true, econfig:get_boolean(t, "section4", "key2")),
+          ?_assertEqual(false, econfig:get_boolean(t, "section4", "key3")),
+          ?_assertEqual(false, econfig:get_boolean(t, "section4", "key33", false)),
+          ?_assertEqual(badarg, (catch econfig:get_boolean(t, "section4", "key4"))),
+          ?_assertEqual(["a", "b"], econfig:get_list(t, "section4", "key4")),
+          ?_assertEqual(1.4, econfig:get_float(t, "section4", "key5")),
+          ?_assertEqual(<<"test">>, econfig:get_binary(t, "section4", "key6"))
+         ]}.
 -endif.

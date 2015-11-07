@@ -55,6 +55,16 @@ ok
 
 Some application may want to handle changes without suscribing to change. This change allows a user to pass a change function when registering the configuation. This function will be called each time a change happen.
 
+### helpers functions
+
+econfig do not guess datatypes of values in configuration files, always storing them internally as strings. This means that if you need other datatypes, you should convert on your own. Some helpers are provided to do it:
+
+- `econfig:get_boolean/{3, 4}`: to convert to boolean
+- `econfig:get_integer/{3, 4}`: to convert to integer
+- `econfig:get_float/{3, 4}`: to convert to float
+- `econfig:get_list/{3, 4}`: to convert a list of string separated by `,` to a list.
+- `econfig:get_binary/{3, 4}`: to convert to a binary
+
 Contribute
 ----------
 For issues, comments or feedback please [create an issue!] [1]

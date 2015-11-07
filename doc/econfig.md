@@ -26,6 +26,16 @@ conf() = atom() | string() | binary()
 
 
 
+### <a name="type-config_options">config_options()</a> ###
+
+
+<pre><code>
+config_options() = [autoreload | {autoreload, integer} | {change_fun, function()}]
+</code></pre>
+
+
+
+
 ### <a name="type-inifile">inifile()</a> ###
 
 
@@ -66,16 +76,6 @@ kvs() = [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]
 
 
 
-### <a name="type-options">options()</a> ###
-
-
-<pre><code>
-options() = [autoreload]
-</code></pre>
-
-
-
-
 ### <a name="type-section">section()</a> ###
 
 
@@ -98,7 +98,9 @@ value() = string()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td>delete all key/values from a section.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value and persist the change to the file.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value and optionnally persist it.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get keys/values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td>delete all key/values from a section.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value and persist the change to the file.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value and optionnally persist it.</td></tr><tr><td valign="top"><a href="#get_binary-3">get_binary/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_binary-4">get_binary/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_boolean-3">get_boolean/3</a></td><td>get a value and convert it to a boolean if possible
+This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
+a badarg error is raised if the value can't be parsed to a boolean.</td></tr><tr><td valign="top"><a href="#get_boolean-4">get_boolean/4</a></td><td>get a value and convert it to a boolean if possible.</td></tr><tr><td valign="top"><a href="#get_float-3">get_float/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_float-4">get_float/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_integer-3">get_integer/3</a></td><td>get a value and convert it to an integer.</td></tr><tr><td valign="top"><a href="#get_integer-4">get_integer/4</a></td><td>get a value and convert it to an integer.</td></tr><tr><td valign="top"><a href="#get_list-3">get_list/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_list-4">get_list/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get keys/values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
 For now the only option is<code>autoreload</code> to auto reload the config on
 files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#sections-1">sections/1</a></td><td>get all sections of a configuration.</td></tr><tr><td valign="top"><a href="#set_value-3">set_value/3</a></td><td>set a list of key/value for a section.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td>set a value and persist it to the file.</td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td>set a value and optionnaly persist it.</td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td>start the config watcher.</td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td>stop the config watcher.</td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
 
@@ -173,6 +175,120 @@ delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#typ
 
 delete a value and optionnally persist it
 
+<a name="get_binary-3"></a>
+
+### get_binary/3 ###
+
+<pre><code>
+get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::binary() | undefined
+</code></pre>
+<br />
+
+get a value and convert it to an float
+
+<a name="get_binary-4"></a>
+
+### get_binary/4 ###
+
+<pre><code>
+get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::binary()) -&gt; Value::binary()
+</code></pre>
+<br />
+
+get a value and convert it to an float
+
+<a name="get_boolean-3"></a>
+
+### get_boolean/3 ###
+
+<pre><code>
+get_boolean(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::boolean() | undefined
+</code></pre>
+<br />
+
+get a value and convert it to a boolean if possible
+This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
+a badarg error is raised if the value can't be parsed to a boolean
+
+<a name="get_boolean-4"></a>
+
+### get_boolean/4 ###
+
+<pre><code>
+get_boolean(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::boolean()) -&gt; Value::boolean()
+</code></pre>
+<br />
+
+get a value and convert it to a boolean if possible. It fallback to default if not set.
+This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
+a badarg error is raised if the value can't be parsed to a boolean
+
+<a name="get_float-3"></a>
+
+### get_float/3 ###
+
+<pre><code>
+get_float(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::float() | undefined
+</code></pre>
+<br />
+
+get a value and convert it to an float
+
+<a name="get_float-4"></a>
+
+### get_float/4 ###
+
+<pre><code>
+get_float(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::float()) -&gt; Value::float()
+</code></pre>
+<br />
+
+get a value and convert it to an float
+
+<a name="get_integer-3"></a>
+
+### get_integer/3 ###
+
+<pre><code>
+get_integer(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::integer() | undefined
+</code></pre>
+<br />
+
+get a value and convert it to an integer
+
+<a name="get_integer-4"></a>
+
+### get_integer/4 ###
+
+<pre><code>
+get_integer(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::integer()) -&gt; Value::integer()
+</code></pre>
+<br />
+
+get a value and convert it to an integer
+
+<a name="get_list-3"></a>
+
+### get_list/3 ###
+
+<pre><code>
+get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::list() | undefined
+</code></pre>
+<br />
+
+get a value and convert it to an float
+
+<a name="get_list-4"></a>
+
+### get_list/4 ###
+
+<pre><code>
+get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::list()) -&gt; Value::list()
+</code></pre>
+<br />
+
+get a value and convert it to an float
+
 <a name="get_value-2"></a>
 
 ### get_value/2 ###
@@ -220,7 +336,7 @@ open or create an ini file an register it
 ### open_config/3 ###
 
 <pre><code>
-open_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>, Options::<a href="#type-options">options()</a>) -&gt; ok | {error, any()}
+open_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>, Options::<a href="#type-config_options">config_options()</a>) -&gt; ok | {error, any()}
 </code></pre>
 <br />
 
@@ -254,7 +370,7 @@ register inifiles or config dirs
 ### register_config/3 ###
 
 <pre><code>
-register_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>, Options::<a href="#type-options">options()</a>) -&gt; ok | {error, any()}
+register_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>, Options::<a href="#type-config_options">config_options()</a>) -&gt; ok | {error, any()}
 </code></pre>
 <br />
 
