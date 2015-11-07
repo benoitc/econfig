@@ -5,7 +5,7 @@
 
 - convert a float value to string when setting it
 - allows to set a boolean value
-- safely run the change hook
+- safely run the change hook, ignore errors, just report them
 
 0.6.0 - 2015-11-07
 ------------------
