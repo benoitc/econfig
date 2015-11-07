@@ -508,11 +508,18 @@ send(ConfigName, Msg) ->
 
 run_change_fun(State, ConfigName, Msg) ->
     {ok, #config{change_fun=ChangeFun}} = dict:find(ConfigName, State#state.confs),
-    case ChangeFun of
-        none -> ok;
-        {M, F} -> apply(M, F, [Msg]);
-        F -> F(Msg)
+    Ret = (catch apply_change_fun(ChangeFun, Msg)),
+    case Ret of
+        {'EXIT', Reason} ->
+            error_logger:warning_msg("~p~n error running change hook: ~p~n", [?MODULE, Reason]),
+            ok;
+        _ ->
+            ok
     end.
+
+apply_change_fun(none, _Msg) -> ok;
+apply_change_fun({M, F}, Msg) -> apply(M, F, [Msg]);
+apply_change_fun(F, Msg) -> F(Msg).
 
 
 initialize_app_confs() ->
