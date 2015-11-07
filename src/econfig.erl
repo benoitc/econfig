@@ -33,11 +33,9 @@
 -type config_options() :: [autoreload | {autoreload, integer}
                           | {change_fun, fun()}].
 -type section() :: string().
--type key() :: string().
--type value() :: string().
--type kvs() :: [{key(), value()}].
+-type kvs() :: [{any(), any()}].
 
--export_type([conf/0, inifile/0, inifiles/0, config_options/0, section/0, key/0, value/0, kvs/0]).
+-export_type([conf/0, inifile/0, inifiles/0, config_options/0, section/0,  kvs/0]).
 
 %% @doc register inifiles or config dirs
 -spec register_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
@@ -120,7 +118,7 @@ stop_autoreload(ConfigName) ->
     econfig_server:stop_autoreload(ConfigName).
 
 %% @doc get all values of a configuration
--spec all(ConfigName::conf()) -> [{section(), [{key(), value()}]}].
+-spec all(ConfigName::conf()) -> [{section(), [{string(), string()}]}].
 all(ConfigName) ->
     econfig_server:all(ConfigName).
 
@@ -130,31 +128,31 @@ sections(ConfigName) ->
     econfig_server:sections(ConfigName).
 
 %% @doc get all sections starting by Prefix
--spec prefix(ConfigName::conf(), Prefix::string()) -> [{section(), [{key(), value()}]}].
+-spec prefix(ConfigName::conf(), Prefix::string()) -> [{section(), [{string(), string()}]}].
 prefix(ConfigName, Prefix) ->
     econfig_server:prefix(ConfigName, Prefix).
 
 %% @doc retrive config as a proplist
--spec cfg2list(ConfigName::conf()) -> [{section(), [{key(), value()}]}].
+-spec cfg2list(ConfigName::conf()) -> [{section(), [{string(), string()}]}].
 cfg2list(ConfigName) ->
     econfig_server:cfg2list(ConfigName).
 
 %% @doc retrieve config as a proplist
--spec cfg2list(ConfigName::conf(), GroupKey::string()) -> [{section(), [{key(), value()}]}].
+-spec cfg2list(ConfigName::conf(), GroupKey::string()) -> [{section(), [{string(), string()}]}].
 cfg2list(ConfigName, GroupKey) ->
     econfig_server:cfg2list(ConfigName, GroupKey).
 
 %% @doc get keys/values of a section
--spec get_value(ConfigName::conf(), Section::string()) -> [{key(), value()}].
+-spec get_value(ConfigName::conf(), Section::string()) -> [{string(), string()}].
 get_value(ConfigName, Section) ->
     econfig_server:get_value(ConfigName, Section).
 
 %% @doc get value for a key in a section
--spec get_value(ConfigName::conf(), Section::section(), Key::key()) -> Value::value() | undefined.
+-spec get_value(ConfigName::conf(), Section::section(), Key::any()) -> Value::string() | undefined.
 get_value(ConfigName, Section, Key) ->
     econfig_server:get_value(ConfigName, Section, Key).
 
--spec get_value(ConfigName::conf(), Section::section(), Key::key(), Default::value()) -> Value::value().
+-spec get_value(ConfigName::conf(), Section::section(), Key::any(), Default::any()) -> Value::string().
 get_value(ConfigName, Section, Key, Default) ->
     econfig_server:get_value(ConfigName, Section, Key, Default).
 
@@ -164,12 +162,12 @@ set_value(ConfigName, Section, KVs) ->
     econfig_server:set_value(ConfigName, Section, KVs).
 
 %% @doc set a value and persist it to the file
--spec set_value(ConfigName::conf(), Section::section(), Key::key(), Value::value()) -> ok.
+-spec set_value(ConfigName::conf(), Section::section(), Key::any(), Value::any()) -> ok.
 set_value(ConfigName, Section, Key, Value) ->
-    econfig_server:set_value(ConfigName, Section, Key, Value).
+    set_value(ConfigName, Section, Key, Value, true).
 
 %% @doc set a value and optionnaly persist it.
--spec set_value(ConfigName::conf(), Section::section(), Key::key(), Value::value(), Persist::boolean()) -> ok.
+-spec set_value(ConfigName::conf(), Section::section(), Key::any(), Value::any(), Persist::boolean()) -> ok.
 set_value(ConfigName, Section, Key, Value, Persist) ->
     econfig_server:set_value(ConfigName, Section, Key, Value, Persist).
 
@@ -179,19 +177,19 @@ delete_value(ConfigName, Section) ->
     econfig_server:delete_value(ConfigName, Section).
 
 %% @doc delete a value and persist the change to the file
--spec delete_value(ConfigName::conf(), Section::section(), Key::key()) -> ok.
+-spec delete_value(ConfigName::conf(), Section::section(), Key::any()) -> ok.
 delete_value(ConfigName, Section, Key) ->
     econfig_server:delete_value(ConfigName, Section, Key).
 
 %% @doc delete a value and optionnally persist it
--spec delete_value(ConfigName::conf(), Section::section(), Key::key(), Persist::boolean()) -> ok.
+-spec delete_value(ConfigName::conf(), Section::section(), Key::any(), Persist::boolean()) -> ok.
 delete_value(ConfigName, Section, Key, Persist) ->
     econfig_server:delete_value(ConfigName, Section, Key, Persist).
 
 %% @doc get a value and convert it to a boolean if possible
 %% This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
 %% a badarg error is raised if the value can't be parsed to a boolean
--spec get_boolean(ConfigName::conf(), Section::section(), Key::key()) -> Value::boolean() | undefined.
+-spec get_boolean(ConfigName::conf(), Section::section(), Key::any()) -> Value::boolean() | undefined.
 get_boolean(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -201,7 +199,7 @@ get_boolean(ConfigName, Section, Key) ->
 %% @doc get a value and convert it to a boolean if possible. It fallback to default if not set.
 %% This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
 %% a badarg error is raised if the value can't be parsed to a boolean
--spec get_boolean(ConfigName::conf(), Section::section(), Key::key(), Default::boolean()) -> Value::boolean().
+-spec get_boolean(ConfigName::conf(), Section::section(), Key::any(), Default::boolean()) -> Value::boolean().
 get_boolean(ConfigName, Section, Key, Default) when is_boolean(Default) ->
     case get_boolean(ConfigName, Section, Key) of
         undefined -> Default;
@@ -209,7 +207,7 @@ get_boolean(ConfigName, Section, Key, Default) when is_boolean(Default) ->
     end.
 
 %% @doc get a value and convert it to an integer
--spec get_integer(ConfigName::conf(), Section::section(), Key::key()) -> Value::integer() | undefined.
+-spec get_integer(ConfigName::conf(), Section::section(), Key::any()) -> Value::integer() | undefined.
 get_integer(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -217,7 +215,7 @@ get_integer(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an integer
--spec get_integer(ConfigName::conf(), Section::section(), Key::key(), Default::integer()) -> Value::integer().
+-spec get_integer(ConfigName::conf(), Section::section(), Key::any(), Default::integer()) -> Value::integer().
 get_integer(ConfigName, Section, Key, Default) when is_integer(Default) ->
     case get_integer(ConfigName, Section, Key) of
         undefined -> Default;
@@ -225,7 +223,7 @@ get_integer(ConfigName, Section, Key, Default) when is_integer(Default) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_float(ConfigName::conf(), Section::section(), Key::key()) -> Value::float() | undefined.
+-spec get_float(ConfigName::conf(), Section::section(), Key::any()) -> Value::float() | undefined.
 get_float(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -233,7 +231,7 @@ get_float(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_float(ConfigName::conf(), Section::section(), Key::key(), Default::float()) -> Value::float().
+-spec get_float(ConfigName::conf(), Section::section(), Key::any(), Default::float()) -> Value::float().
 get_float(ConfigName, Section, Key, Default) when is_float(Default) ->
     case get_float(ConfigName, Section, Key) of
         undefined -> Default;
@@ -241,7 +239,7 @@ get_float(ConfigName, Section, Key, Default) when is_float(Default) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_list(ConfigName::conf(), Section::section(), Key::key()) -> Value::list() | undefined.
+-spec get_list(ConfigName::conf(), Section::section(), Key::any()) -> Value::list() | undefined.
 get_list(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -249,7 +247,7 @@ get_list(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_list(ConfigName::conf(), Section::section(), Key::key(), Default::list()) -> Value::list().
+-spec get_list(ConfigName::conf(), Section::section(), Key::any(), Default::list()) -> Value::list().
 get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
     case get_list(ConfigName, Section, Key) of
         undefined -> Default;
@@ -257,7 +255,7 @@ get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_binary(ConfigName::conf(), Section::section(), Key::key()) -> Value::binary() | undefined.
+-spec get_binary(ConfigName::conf(), Section::section(), Key::any()) -> Value::binary() | undefined.
 get_binary(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -265,7 +263,7 @@ get_binary(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_binary(ConfigName::conf(), Section::section(), Key::key(), Default::binary()) -> Value::binary().
+-spec get_binary(ConfigName::conf(), Section::section(), Key::any(), Default::binary()) -> Value::binary().
 get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
     case get_binary(ConfigName, Section, Key) of
         undefined -> Default;
@@ -274,6 +272,7 @@ get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
 
 
 to_boolean(Val) ->
+    io:format("val is ~p~n", [Val]),
     case string:to_lower(Val) of
         "true" -> true;
         "false" -> false;
@@ -284,7 +283,7 @@ to_boolean(Val) ->
         "yes" -> true;
         "no" -> false;
         undefined -> undefined;
-        _ -> 
+        _ ->
             error(badarg)
     end.
 
@@ -379,6 +378,24 @@ parse_test_() ->
       ?_assertEqual(undefined, econfig:get_value(t, "section3", "key15"))
      ]}.
 
+
+parse_with_helpers_test_() ->
+    {setup,
+         fun setup/0,
+         fun cleanup/1,
+         [?_assertEqual(1, econfig:get_integer(t, "section4", "key1")),
+          ?_assertEqual(undefined, econfig:get_integer(t, "section4", "key11")),
+          ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_integer(t, "section4", "key2"))),
+          ?_assertEqual(11, econfig:get_integer(t, "section4", "key11", 11)),
+          ?_assertEqual(true, econfig:get_boolean(t, "section4", "key2")),
+          ?_assertEqual(false, econfig:get_boolean(t, "section4", "key3")),
+          ?_assertEqual(false, econfig:get_boolean(t, "section4", "key33", false)),
+          ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_boolean(t, "section4", "key4"))),
+          ?_assertEqual(["a", "b"], econfig:get_list(t, "section4", "key4")),
+          ?_assertEqual(1.4, econfig:get_float(t, "section4", "key5")),
+          ?_assertEqual(<<"test">>, econfig:get_binary(t, "section4", "key6"))
+         ]}.
+
 parse_multi_test_() ->
     {setup,
      fun setup_multi/0,
@@ -427,6 +444,27 @@ modify_test_() ->
            econfig:set_value(t, "section 2", "key7", ""),
            econfig:reload(t),
            ?assertEqual(undefined, econfig:get_value(t, "section 2", "key7"))
+       end,
+
+       % store integer and retrieved
+       fun() ->
+               econfig:set_value(t, "section 2", "key7", 10),
+               econfig:reload(t),
+               ?assertEqual(10, econfig:get_integer(t, "section 2", "key7"))
+       end,
+
+       % store boolean and retrieved
+       fun() ->
+               econfig:set_value(t, "section 2", "key7", true),
+               econfig:reload(t),
+               ?assertEqual(true, econfig:get_boolean(t, "section 2", "key7"))
+       end,
+
+       % store float and retrieved
+       fun() ->
+               econfig:set_value(t, "section 2", "key7", 1.4),
+               econfig:reload(t),
+               ?assertEqual(1.4, econfig:get_float(t, "section 2", "key7"))
        end
      ]}}.
 
@@ -565,20 +603,4 @@ change_fun_test_() ->
       end
      ]}.
 
-parse_with_helpers_test_() ->
-    {setup,
-         fun setup/0,
-         fun cleanup/1,
-         [?_assertEqual(1, econfig:get_integer(t, "section4", "key1")),
-          ?_assertEqual(undefined, econfig:get_integer(t, "section4", "key11")),
-          ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_integer(t, "section4", "key2"))),
-          ?_assertEqual(11, econfig:get_integer(t, "section4", "key11", 11)),
-          ?_assertEqual(true, econfig:get_boolean(t, "section4", "key2")),
-          ?_assertEqual(false, econfig:get_boolean(t, "section4", "key3")),
-          ?_assertEqual(false, econfig:get_boolean(t, "section4", "key33", false)),
-          ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_boolean(t, "section4", "key4"))),
-          ?_assertEqual(["a", "b"], econfig:get_list(t, "section4", "key4")),
-          ?_assertEqual(1.4, econfig:get_float(t, "section4", "key5")),
-          ?_assertEqual(<<"test">>, econfig:get_binary(t, "section4", "key6"))
-         ]}.
 -endif.

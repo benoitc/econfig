@@ -220,19 +220,13 @@ set_value(ConfigName, Section0, List, Persist)
     List1 = [{econfig_util:to_list(K), econfig_util:to_list(V)}
               || {K, V} <- List],
     gen_server:call(?MODULE, {mset, {ConfigName, Section, List1,
-                                     Persist}}, infinity);
-
-%% @doc set a value
-set_value(ConfigName, Section, Key, Value) ->
-    set_value(ConfigName, Section, Key, Value, true).
+                                     Persist}}, infinity).
 
 set_value(ConfigName, Section0, Key0, Value0, Persist) ->
     Section = econfig_util:to_list(Section0),
     Key = econfig_util:to_list(Key0),
     Value = econfig_util:to_list(Value0),
-
-    gen_server:call(?MODULE, {set, {ConfigName, Section, Key, Value,
-                                    Persist}}, infinity).
+    gen_server:call(?MODULE, {set, {ConfigName, Section, Key, Value, Persist}}, infinity).
 
 delete_value(ConfigName, Section) ->
     delete_value(ConfigName, Section, true).

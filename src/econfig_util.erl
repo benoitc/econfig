@@ -85,6 +85,8 @@ to_list(V) when is_atom(V) ->
     atom_to_list(V);
 to_list(V) when is_integer(V) ->
     integer_to_list(V);
+to_list(V) when is_float(V) ->
+    io_lib:format("~.3f", [V]);
 to_list(V) ->
     lists:flatten(io_lib:format("~p", [V])).
 
