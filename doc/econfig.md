@@ -56,21 +56,11 @@ inifiles() = [<a href="#type-inifile">inifile()</a>]
 
 
 
-### <a name="type-key">key()</a> ###
-
-
-<pre><code>
-key() = string()
-</code></pre>
-
-
-
-
 ### <a name="type-kvs">kvs()</a> ###
 
 
 <pre><code>
-kvs() = [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]
+kvs() = [{any(), any()}]
 </code></pre>
 
 
@@ -81,16 +71,6 @@ kvs() = [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]
 
 <pre><code>
 section() = string()
-</code></pre>
-
-
-
-
-### <a name="type-value">value()</a> ###
-
-
-<pre><code>
-value() = string()
 </code></pre>
 
 <a name="index"></a>
@@ -114,7 +94,7 @@ files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/
 ### all/1 ###
 
 <pre><code>
-all(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+all(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [{<a href="#type-section">section()</a>, [{string(), string()}]}]
 </code></pre>
 <br />
 
@@ -125,7 +105,7 @@ get all values of a configuration
 ### cfg2list/1 ###
 
 <pre><code>
-cfg2list(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+cfg2list(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [{<a href="#type-section">section()</a>, [{string(), string()}]}]
 </code></pre>
 <br />
 
@@ -136,7 +116,7 @@ retrive config as a proplist
 ### cfg2list/2 ###
 
 <pre><code>
-cfg2list(ConfigName::<a href="#type-conf">conf()</a>, GroupKey::string()) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+cfg2list(ConfigName::<a href="#type-conf">conf()</a>, GroupKey::string()) -&gt; [{<a href="#type-section">section()</a>, [{string(), string()}]}]
 </code></pre>
 <br />
 
@@ -158,7 +138,7 @@ delete all key/values from a section
 ### delete_value/3 ###
 
 <pre><code>
-delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; ok
+delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; ok
 </code></pre>
 <br />
 
@@ -169,7 +149,7 @@ delete a value and persist the change to the file
 ### delete_value/4 ###
 
 <pre><code>
-delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Persist::boolean()) -&gt; ok
+delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Persist::boolean()) -&gt; ok
 </code></pre>
 <br />
 
@@ -180,7 +160,7 @@ delete a value and optionnally persist it
 ### get_binary/3 ###
 
 <pre><code>
-get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::binary() | undefined
+get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; Value::binary() | undefined
 </code></pre>
 <br />
 
@@ -191,7 +171,7 @@ get a value and convert it to an float
 ### get_binary/4 ###
 
 <pre><code>
-get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::binary()) -&gt; Value::binary()
+get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::binary()) -&gt; Value::binary()
 </code></pre>
 <br />
 
@@ -202,7 +182,7 @@ get a value and convert it to an float
 ### get_boolean/3 ###
 
 <pre><code>
-get_boolean(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::boolean() | undefined
+get_boolean(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; Value::boolean() | undefined
 </code></pre>
 <br />
 
@@ -215,7 +195,7 @@ a badarg error is raised if the value can't be parsed to a boolean
 ### get_boolean/4 ###
 
 <pre><code>
-get_boolean(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::boolean()) -&gt; Value::boolean()
+get_boolean(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::boolean()) -&gt; Value::boolean()
 </code></pre>
 <br />
 
@@ -228,7 +208,7 @@ a badarg error is raised if the value can't be parsed to a boolean
 ### get_float/3 ###
 
 <pre><code>
-get_float(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::float() | undefined
+get_float(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; Value::float() | undefined
 </code></pre>
 <br />
 
@@ -239,7 +219,7 @@ get a value and convert it to an float
 ### get_float/4 ###
 
 <pre><code>
-get_float(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::float()) -&gt; Value::float()
+get_float(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::float()) -&gt; Value::float()
 </code></pre>
 <br />
 
@@ -250,7 +230,7 @@ get a value and convert it to an float
 ### get_integer/3 ###
 
 <pre><code>
-get_integer(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::integer() | undefined
+get_integer(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; Value::integer() | undefined
 </code></pre>
 <br />
 
@@ -261,7 +241,7 @@ get a value and convert it to an integer
 ### get_integer/4 ###
 
 <pre><code>
-get_integer(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::integer()) -&gt; Value::integer()
+get_integer(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::integer()) -&gt; Value::integer()
 </code></pre>
 <br />
 
@@ -272,7 +252,7 @@ get a value and convert it to an integer
 ### get_list/3 ###
 
 <pre><code>
-get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::list() | undefined
+get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; Value::list() | undefined
 </code></pre>
 <br />
 
@@ -283,7 +263,7 @@ get a value and convert it to an float
 ### get_list/4 ###
 
 <pre><code>
-get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::list()) -&gt; Value::list()
+get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::list()) -&gt; Value::list()
 </code></pre>
 <br />
 
@@ -294,7 +274,7 @@ get a value and convert it to an float
 ### get_value/2 ###
 
 <pre><code>
-get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::string()) -&gt; [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]
+get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::string()) -&gt; [{string(), string()}]
 </code></pre>
 <br />
 
@@ -305,7 +285,7 @@ get keys/values of a section
 ### get_value/3 ###
 
 <pre><code>
-get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::<a href="#type-value">value()</a> | undefined
+get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any()) -&gt; Value::string() | undefined
 </code></pre>
 <br />
 
@@ -316,7 +296,7 @@ get value for a key in a section
 ### get_value/4 ###
 
 <pre><code>
-get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::<a href="#type-value">value()</a>) -&gt; Value::<a href="#type-value">value()</a>
+get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::any()) -&gt; Value::string()
 </code></pre>
 <br />
 
@@ -348,7 +328,7 @@ register_config function for a list of available functions.
 ### prefix/2 ###
 
 <pre><code>
-prefix(ConfigName::<a href="#type-conf">conf()</a>, Prefix::string()) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+prefix(ConfigName::<a href="#type-conf">conf()</a>, Prefix::string()) -&gt; [{<a href="#type-section">section()</a>, [{string(), string()}]}]
 </code></pre>
 <br />
 
@@ -439,7 +419,7 @@ set a list of key/value for a section
 ### set_value/4 ###
 
 <pre><code>
-set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>) -&gt; ok
+set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Value::any()) -&gt; ok
 </code></pre>
 <br />
 
@@ -450,7 +430,7 @@ set a value and persist it to the file
 ### set_value/5 ###
 
 <pre><code>
-set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, Persist::boolean()) -&gt; ok
+set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Value::any(), Persist::boolean()) -&gt; ok
 </code></pre>
 <br />
 
