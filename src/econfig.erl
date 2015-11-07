@@ -20,14 +20,16 @@
          set_value/3, set_value/4, set_value/5,
          delete_value/2, delete_value/3, delete_value/4]).
 
--type conf() :: atom() | string() | binary().
+-type conf() :: atom() | string() | binary().
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
--type options() :: [autoreload].
+-type options() :: [autoreload | {change_fun, fun()}].
 -type section() :: string().
 -type key() :: string().
 -type value() :: string().
 -type kvs() :: [{key(), value()}].
+
+-export_type([conf/0, inifile/0, inifiles/0, options/0, section/0, key/0, value/0, kvs/0]).
 
 %% @doc register inifiles or config dirs
 -spec register_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
@@ -140,7 +142,7 @@ get_value(ConfigName, Section) ->
     econfig_server:get_value(ConfigName, Section).
 
 %% @doc get value for a key in a section
--spec get_value(ConfigName::conf(), Section::section(), Key::key()) -> Value::value() | undefined.
+-spec get_value(ConfigName::conf(), Section::section(), Key::key()) -> Value::value() | undefined.
 get_value(ConfigName, Section, Key) ->
     econfig_server:get_value(ConfigName, Section, Key).
 
