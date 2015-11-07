@@ -49,7 +49,7 @@ Shell got {config_updated,test,{set,{"section1","key6"}}}
 ok
 ```
 
-## Specific features
+## Advanced features
 
 ### on_change hook
 
