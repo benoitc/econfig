@@ -1,5 +1,13 @@
 #econfig news
 
+0.5.0 - 2015-11-07
+------------------
+
+- add `on_change` function
+- remove gproc dependency
+- move to rebar3 + hex packaging support
+- make ets resilient to the main process crash
+
 0.4.2 - 2014-03-22
 ------------------
 
