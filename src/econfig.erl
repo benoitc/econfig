@@ -269,7 +269,7 @@ get_binary(ConfigName, Section, Key) ->
 get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
     case get_binary(ConfigName, Section, Key) of
         undefined -> Default;
-        LVal -> LVal
+        Val -> Val
     end.
 
 
@@ -285,19 +285,19 @@ to_boolean(Val) ->
         "no" -> false;
         undefined -> undefined;
         _ -> 
-            throw(badarg)
+            error(badarg)
     end.
 
 to_int(Val) ->
     case string:to_integer(Val) of
         {IVal, []} -> IVal;
-        _ -> throw(badarg)
+        _ -> error(badarg)
     end.
 
 to_float(Val) ->
     case string:to_float(Val) of
         {FVal, []} -> FVal;
-        _ -> throw(badarg)
+        _ -> error(badarg)
     end.
 
 to_list("") -> [];
@@ -313,7 +313,7 @@ to_binary(Val) ->
     try list_to_binary(Val) of
         Bin ->  Bin
     catch
-        _ -> throw(badarg)
+        _ -> error(badarg)
     end.
 
 
@@ -571,12 +571,12 @@ parse_with_helpers_test_() ->
          fun cleanup/1,
          [?_assertEqual(1, econfig:get_integer(t, "section4", "key1")),
           ?_assertEqual(undefined, econfig:get_integer(t, "section4", "key11")),
-          ?_assertEqual(badarg, (catch econfig:get_integer(t, "section4", "key2"))),
+          ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_integer(t, "section4", "key2"))),
           ?_assertEqual(11, econfig:get_integer(t, "section4", "key11", 11)),
           ?_assertEqual(true, econfig:get_boolean(t, "section4", "key2")),
           ?_assertEqual(false, econfig:get_boolean(t, "section4", "key3")),
           ?_assertEqual(false, econfig:get_boolean(t, "section4", "key33", false)),
-          ?_assertEqual(badarg, (catch econfig:get_boolean(t, "section4", "key4"))),
+          ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_boolean(t, "section4", "key4"))),
           ?_assertEqual(["a", "b"], econfig:get_list(t, "section4", "key4")),
           ?_assertEqual(1.4, econfig:get_float(t, "section4", "key5")),
           ?_assertEqual(<<"test">>, econfig:get_binary(t, "section4", "key6"))
