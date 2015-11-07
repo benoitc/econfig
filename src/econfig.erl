@@ -23,13 +23,14 @@
 -type conf() :: atom() | string() | binary().
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
--type options() :: [autoreload | {change_fun, fun()}].
+-type config_options() :: [autoreload | {autoreload, integer}
+                          | {change_fun, fun()}].
 -type section() :: string().
 -type key() :: string().
 -type value() :: string().
 -type kvs() :: [{key(), value()}].
 
--export_type([conf/0, inifile/0, inifiles/0, options/0, section/0, key/0, value/0, kvs/0]).
+-export_type([conf/0, inifile/0, inifiles/0, config_options/0, section/0, key/0, value/0, kvs/0]).
 
 %% @doc register inifiles or config dirs
 -spec register_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
@@ -52,7 +53,7 @@ register_config(ConfigName, IniFiles) ->
 %%  changes. Delay set the time between each scan. Default is 5000
 %%  and can be set using the `scan_delay' application environement
 %%  for econfig.
--spec register_config(ConfigName::conf(), IniFiles::inifiles(), Options::options()) -> ok | {error, any()}.
+-spec register_config(ConfigName::conf(), IniFiles::inifiles(), Options::config_options()) -> ok | {error, any()}.
 register_config(ConfigName, IniFiles, Options) ->
     econfig_server:register_config(ConfigName, IniFiles, Options).
 
@@ -69,7 +70,7 @@ open_config(ConfigName, IniFile) ->
 
 %% @doc open or create an ini file an register it. See the
 %% register_config function for a list of available functions.
--spec open_config(ConfigName::conf(), IniFiles::inifiles(), Options::options()) -> ok | {error, any()}.
+-spec open_config(ConfigName::conf(), IniFiles::inifiles(), Options::config_options()) -> ok | {error, any()}.
 open_config(ConfigName, IniFile, Options) ->
     econfig_server:open_config(ConfigName, IniFile, Options).
 
