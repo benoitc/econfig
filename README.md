@@ -2,9 +2,9 @@
 
 # econfig - simple Erlang config handler using INI files #
 
-Copyright (c) 2012-2014 Benoît Chesneau.
+Copyright (c) 2012-2015 Benoît Chesneau.
 
-__Version:__ 0.4.2
+__Version:__ 0.5.0
 
 # econfig
 
@@ -30,29 +30,30 @@ for last changes.
 Quick usage example:
 
 ```
-1> application:start(gproc).
+1> application:ensure_all_started(econfig).
 ok
-2> application:start(econfig).
+2> econfig:register_config(test, ["test/fixtures/test.ini", "test/fixtures/test2.ini"], [autoreload]).
 ok
-3> econfig:register_config(couchdb, ["/Users/benoitc/refuge/rcouch/rel/rcouch/etc/default.ini", "/Users/benoitc/refuge/rcouch/rel/rcouch/etc/local.ini"], [autoreload]).
-ok
-4> econfig:subscribe(couchdb).
+3> econfig:subscribe(test).
 true
-5> econfig:get_value(couchdb, "couchdb").
-[{"delayed_commits","true"},
- {"file_compression","snappy"},
- {"os_process_timeout","5000"},
- {"uri_file","./data/couch.uri"},
- {"index_dir","./data"},
- {"max_document_size","4294967296"},
- {"database_dir","./data"},
- {"max_dbs_open","100"}]
-6> econfig:set_value(couchdb, "ssl", "test", "1").
+4> econfig:get_value(test, "section1").
+[{"key 3","value 3"},
+ {"key1","value1"},
+ {"key2","value 2"},
+ {"key4","value 4"},
+ {"key5","value5"}]
+5> econfig:set_value(test, "section1", "key6", "value6").
 ok
-7> flush().
-Shell got {config_updated,couchdb,{set,{"ssl","test"}}}
+6> flush().
+Shell got {config_updated,test,{set,{"section1","key6"}}}
 ok
 ```
+
+## Specific features
+
+### on_change hook
+
+Some application may want to handle changes without suscribing to change. This change allows a user to pass a change function when registering the configuation. This function will be called each time a change happen.
 
 Contribute
 ----------

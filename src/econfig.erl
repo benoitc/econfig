@@ -20,18 +20,21 @@
          set_value/3, set_value/4, set_value/5,
          delete_value/2, delete_value/3, delete_value/4]).
 
+-type conf() :: atom() | string() | binary().
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
 -type options() :: [autoreload].
+-type section() :: string().
+-type key() :: string().
+-type value() :: string().
+-type kvs() :: [{key(), value()}].
 
--spec register_config(term(), econfig:inifiles()) -> ok | {error,
-                                                           any()}.
 %% @doc register inifiles or config dirs
+-spec register_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
 register_config(ConfigName, IniFiles) ->
     econfig_server:register_config(ConfigName, IniFiles).
 
--spec register_config(term(), econfig:inifiles(), econfig:options())
-    -> ok | {error, any()}.
+
 %% @doc register inifiles of config dirs with options
 %% For now the only option is  `autoreload' to auto reload the config on
 %% files or dirs changes.
@@ -47,20 +50,24 @@ register_config(ConfigName, IniFiles) ->
 %%  changes. Delay set the time between each scan. Default is 5000
 %%  and can be set using the `scan_delay' application environement
 %%  for econfig.
+-spec register_config(ConfigName::conf(), IniFiles::inifiles(), Options::options()) -> ok | {error, any()}.
 register_config(ConfigName, IniFiles, Options) ->
     econfig_server:register_config(ConfigName, IniFiles, Options).
 
--spec unregister_config(term()) -> ok.
+
 %% @doc unregister a conf
+-spec unregister_config(conf()) -> ok.
 unregister_config(ConfigName) ->
     econfig_server:unregister_config(ConfigName).
 
 %% @doc open or create an ini file an register it
+-spec open_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
 open_config(ConfigName, IniFile) ->
     econfig_server:open_config(ConfigName, IniFile).
 
 %% @doc open or create an ini file an register it. See the
 %% register_config function for a list of available functions.
+-spec open_config(ConfigName::conf(), IniFiles::inifiles(), Options::options()) -> ok | {error, any()}.
 open_config(ConfigName, IniFile, Options) ->
     econfig_server:open_config(ConfigName, IniFile, Options).
 
@@ -71,81 +78,103 @@ open_config(ConfigName, IniFile, Options) ->
 %% `{config_updated, ConfigName, {Section, Key}}'
 %%
 %% @end
+-spec subscribe(ConfigName::conf()) -> ok.
 subscribe(ConfigName) ->
     econfig_server:subscribe(ConfigName).
 
 %% @doc Remove subscribtion created using `subscribe(ConfigName)'
 %%
 %% @end
+-spec unsubscribe(ConfigName::conf()) -> ok.
 unsubscribe(ConfigName) ->
     econfig_server:unsubscribe(ConfigName).
 
 %% @doc reload the configuration
+-spec reload(ConfigName::conf()) -> ok.
 reload(ConfigName) ->
     econfig_server:reload(ConfigName).
 
 %% @doc reload the configuration
+-spec reload(ConfigName::conf(), IniFiles::inifiles()) -> ok.
 reload(ConfigName, IniFiles) ->
     econfig_server:reload(ConfigName, IniFiles).
 
-
+%% @doc start the config watcher.
+-spec start_autoreload(ConfigName::conf()) -> ok.
 start_autoreload(ConfigName) ->
     econfig_server:start_autoreload(ConfigName).
 
+%% @doc stop the config watcher.
+-spec stop_autoreload(ConfigName::conf()) -> ok.
 stop_autoreload(ConfigName) ->
     econfig_server:stop_autoreload(ConfigName).
 
 %% @doc get all values of a configuration
+-spec all(ConfigName::conf()) -> [{section(), [{key(), value()}]}].
 all(ConfigName) ->
     econfig_server:all(ConfigName).
 
 %% @doc get all sections of a configuration
+-spec sections(ConfigName::conf()) -> [section()].
 sections(ConfigName) ->
     econfig_server:sections(ConfigName).
 
 %% @doc get all sections starting by Prefix
+-spec prefix(ConfigName::conf(), Prefix::string()) -> [{section(), [{key(), value()}]}].
 prefix(ConfigName, Prefix) ->
     econfig_server:prefix(ConfigName, Prefix).
 
 %% @doc retrive config as a proplist
+-spec cfg2list(ConfigName::conf()) -> [{section(), [{key(), value()}]}].
 cfg2list(ConfigName) ->
     econfig_server:cfg2list(ConfigName).
 
 %% @doc retrieve config as a proplist
+-spec cfg2list(ConfigName::conf(), GroupKey::string()) -> [{section(), [{key(), value()}]}].
 cfg2list(ConfigName, GroupKey) ->
     econfig_server:cfg2list(ConfigName, GroupKey).
 
-%% @doc get values of a section
+%% @doc get keys/values of a section
+-spec get_value(ConfigName::conf(), Section::string()) -> [{key(), value()}].
 get_value(ConfigName, Section) ->
     econfig_server:get_value(ConfigName, Section).
 
 %% @doc get value for a key in a section
+-spec get_value(ConfigName::conf(), Section::section(), Key::key()) -> Value::value() | undefined.
 get_value(ConfigName, Section, Key) ->
     econfig_server:get_value(ConfigName, Section, Key).
 
+-spec get_value(ConfigName::conf(), Section::section(), Key::key(), Default::value()) -> Value::value().
 get_value(ConfigName, Section, Key, Default) ->
     econfig_server:get_value(ConfigName, Section, Key, Default).
 
-%% @doc set a value
-set_value(ConfigName, Section, Value) ->
-    econfig_server:set_value(ConfigName, Section, Value).
+%% @doc set a list of key/value for a section
+-spec set_value(ConfigName::conf(), Section::section(), KVs::kvs()) -> ok.
+set_value(ConfigName, Section, KVs) ->
+    econfig_server:set_value(ConfigName, Section, KVs).
 
-%% @doc set a value
+%% @doc set a value and persist it to the file
+-spec set_value(ConfigName::conf(), Section::section(), Key::key(), Value::value()) -> ok.
 set_value(ConfigName, Section, Key, Value) ->
     econfig_server:set_value(ConfigName, Section, Key, Value).
 
+%% @doc set a value and optionnaly persist it.
+-spec set_value(ConfigName::conf(), Section::section(), Key::key(), Value::value(), Persist::boolean()) -> ok.
 set_value(ConfigName, Section, Key, Value, Persist) ->
     econfig_server:set_value(ConfigName, Section, Key, Value, Persist).
 
-%% @doc delete a value
+%% @doc delete all key/values from a section
+-spec delete_value(ConfigName::conf(), Section::section()) -> ok.
 delete_value(ConfigName, Section) ->
     econfig_server:delete_value(ConfigName, Section).
 
-%% @doc delete a value
+%% @doc delete a value and persist the change to the file
+-spec delete_value(ConfigName::conf(), Section::section(), Key::key()) -> ok.
 delete_value(ConfigName, Section, Key) ->
     econfig_server:delete_value(ConfigName, Section, Key).
 
-%% @doc delete a value
+%% @doc delete a value and optionnally persist it
+-spec delete_value(ConfigName::conf(), Section::section(), Key::key(), Persist::boolean()) -> ok.
 delete_value(ConfigName, Section, Key, Persist) ->
     econfig_server:delete_value(ConfigName, Section, Key, Persist).
 

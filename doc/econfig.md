@@ -2,20 +2,105 @@
 
 # Module econfig #
 * [Description](#description)
+* [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
 
 Public API of econfig
-econfig rely on a central gen_server and an ordered ets table.
+econfig rely on a central gen_server an an ETS ordered-set.
+
+<a name="types"></a>
+
+## Data Types ##
+
+
+
+
+### <a name="type-conf">conf()</a> ###
+
+
+<pre><code>
+conf() = atom() | string() | binary()
+</code></pre>
+
+
+
+
+### <a name="type-inifile">inifile()</a> ###
+
+
+<pre><code>
+inifile() = string()
+</code></pre>
+
+
+
+
+### <a name="type-inifiles">inifiles()</a> ###
+
+
+<pre><code>
+inifiles() = [<a href="#type-inifile">inifile()</a>]
+</code></pre>
+
+
+
+
+### <a name="type-key">key()</a> ###
+
+
+<pre><code>
+key() = string()
+</code></pre>
+
+
+
+
+### <a name="type-kvs">kvs()</a> ###
+
+
+<pre><code>
+kvs() = [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]
+</code></pre>
+
+
+
+
+### <a name="type-options">options()</a> ###
+
+
+<pre><code>
+options() = [autoreload]
+</code></pre>
+
+
+
+
+### <a name="type-section">section()</a> ###
+
+
+<pre><code>
+section() = string()
+</code></pre>
+
+
+
+
+### <a name="type-value">value()</a> ###
+
+
+<pre><code>
+value() = string()
+</code></pre>
 
 <a name="index"></a>
 
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td>delete a value.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td>delete all key/values from a section.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value and persist the change to the file.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value and optionnally persist it.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get keys/values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
 For now the only option is<code>autoreload</code> to auto reload the config on
-files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#sections-1">sections/1</a></td><td>get all sections of a configuration.</td></tr><tr><td valign="top"><a href="#set_value-3">set_value/3</a></td><td>set a value.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td>set a value.</td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td></td></tr><tr><td valign="top"><a href="#start-0">start/0</a></td><td>Start the couchbeam process.</td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#stop-0">stop/0</a></td><td>Stop the couchbeam process.</td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td></td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
+files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#sections-1">sections/1</a></td><td>get all sections of a configuration.</td></tr><tr><td valign="top"><a href="#set_value-3">set_value/3</a></td><td>set a list of key/value for a section.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td>set a value and persist it to the file.</td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td>set a value and optionnaly persist it.</td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td>start the config watcher.</td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td>stop the config watcher.</td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
 
 
 <a name="functions"></a>
@@ -26,7 +111,10 @@ files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/
 
 ### all/1 ###
 
-`all(ConfigName) -> any()`
+<pre><code>
+all(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+</code></pre>
+<br />
 
 get all values of a configuration
 
@@ -34,7 +122,10 @@ get all values of a configuration
 
 ### cfg2list/1 ###
 
-`cfg2list(ConfigName) -> any()`
+<pre><code>
+cfg2list(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+</code></pre>
+<br />
 
 retrive config as a proplist
 
@@ -42,7 +133,10 @@ retrive config as a proplist
 
 ### cfg2list/2 ###
 
-`cfg2list(ConfigName, GroupKey) -> any()`
+<pre><code>
+cfg2list(ConfigName::<a href="#type-conf">conf()</a>, GroupKey::string()) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+</code></pre>
+<br />
 
 retrieve config as a proplist
 
@@ -50,39 +144,54 @@ retrieve config as a proplist
 
 ### delete_value/2 ###
 
-`delete_value(ConfigName, Section) -> any()`
+<pre><code>
+delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>) -&gt; ok
+</code></pre>
+<br />
 
-delete a value
+delete all key/values from a section
 
 <a name="delete_value-3"></a>
 
 ### delete_value/3 ###
 
-`delete_value(ConfigName, Section, Key) -> any()`
+<pre><code>
+delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; ok
+</code></pre>
+<br />
 
-delete a value
+delete a value and persist the change to the file
 
 <a name="delete_value-4"></a>
 
 ### delete_value/4 ###
 
-`delete_value(ConfigName, Section, Key, Persist) -> any()`
+<pre><code>
+delete_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Persist::boolean()) -&gt; ok
+</code></pre>
+<br />
 
-delete a value
+delete a value and optionnally persist it
 
 <a name="get_value-2"></a>
 
 ### get_value/2 ###
 
-`get_value(ConfigName, Section) -> any()`
+<pre><code>
+get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::string()) -&gt; [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]
+</code></pre>
+<br />
 
-get values of a section
+get keys/values of a section
 
 <a name="get_value-3"></a>
 
 ### get_value/3 ###
 
-`get_value(ConfigName, Section, Key) -> any()`
+<pre><code>
+get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>) -&gt; Value::<a href="#type-value">value()</a> | undefined
+</code></pre>
+<br />
 
 get value for a key in a section
 
@@ -90,13 +199,19 @@ get value for a key in a section
 
 ### get_value/4 ###
 
-`get_value(ConfigName, Section, Key, Default) -> any()`
+<pre><code>
+get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Default::<a href="#type-value">value()</a>) -&gt; Value::<a href="#type-value">value()</a>
+</code></pre>
+<br />
 
 <a name="open_config-2"></a>
 
 ### open_config/2 ###
 
-`open_config(ConfigName, IniFile) -> any()`
+<pre><code>
+open_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>) -&gt; ok | {error, any()}
+</code></pre>
+<br />
 
 open or create an ini file an register it
 
@@ -104,7 +219,10 @@ open or create an ini file an register it
 
 ### open_config/3 ###
 
-`open_config(ConfigName, IniFile, Options) -> any()`
+<pre><code>
+open_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>, Options::<a href="#type-options">options()</a>) -&gt; ok | {error, any()}
+</code></pre>
+<br />
 
 open or create an ini file an register it. See the
 register_config function for a list of available functions.
@@ -113,7 +231,10 @@ register_config function for a list of available functions.
 
 ### prefix/2 ###
 
-`prefix(ConfigName, Prefix) -> any()`
+<pre><code>
+prefix(ConfigName::<a href="#type-conf">conf()</a>, Prefix::string()) -&gt; [{<a href="#type-section">section()</a>, [{<a href="#type-key">key()</a>, <a href="#type-value">value()</a>}]}]
+</code></pre>
+<br />
 
 get all sections starting by Prefix
 
@@ -122,7 +243,7 @@ get all sections starting by Prefix
 ### register_config/2 ###
 
 <pre><code>
-register_config(ConfigName::term(), IniFiles::<a href="econfig.md#type-inifiles">econfig:inifiles()</a>) -&gt; ok | {error, any()}
+register_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>) -&gt; ok | {error, any()}
 </code></pre>
 <br />
 
@@ -133,7 +254,7 @@ register inifiles or config dirs
 ### register_config/3 ###
 
 <pre><code>
-register_config(ConfigName::term(), IniFiles::<a href="econfig.md#type-inifiles">econfig:inifiles()</a>, Options::<a href="econfig.md#type-options">econfig:options()</a>) -&gt; ok | {error, any()}
+register_config(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>, Options::<a href="#type-options">options()</a>) -&gt; ok | {error, any()}
 </code></pre>
 <br />
 
@@ -157,7 +278,10 @@ for econfig.
 
 ### reload/1 ###
 
-`reload(ConfigName) -> any()`
+<pre><code>
+reload(ConfigName::<a href="#type-conf">conf()</a>) -&gt; ok
+</code></pre>
+<br />
 
 reload the configuration
 
@@ -165,7 +289,10 @@ reload the configuration
 
 ### reload/2 ###
 
-`reload(ConfigName, IniFiles) -> any()`
+<pre><code>
+reload(ConfigName::<a href="#type-conf">conf()</a>, IniFiles::<a href="#type-inifiles">inifiles()</a>) -&gt; ok
+</code></pre>
+<br />
 
 reload the configuration
 
@@ -173,7 +300,10 @@ reload the configuration
 
 ### sections/1 ###
 
-`sections(ConfigName) -> any()`
+<pre><code>
+sections(ConfigName::<a href="#type-conf">conf()</a>) -&gt; [<a href="#type-section">section()</a>]
+</code></pre>
+<br />
 
 get all sections of a configuration
 
@@ -181,57 +311,65 @@ get all sections of a configuration
 
 ### set_value/3 ###
 
-`set_value(ConfigName, Section, Value) -> any()`
+<pre><code>
+set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, KVs::<a href="#type-kvs">kvs()</a>) -&gt; ok
+</code></pre>
+<br />
 
-set a value
+set a list of key/value for a section
 
 <a name="set_value-4"></a>
 
 ### set_value/4 ###
 
-`set_value(ConfigName, Section, Key, Value) -> any()`
+<pre><code>
+set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>) -&gt; ok
+</code></pre>
+<br />
 
-set a value
+set a value and persist it to the file
 
 <a name="set_value-5"></a>
 
 ### set_value/5 ###
 
-`set_value(ConfigName, Section, Key, Value, Persist) -> any()`
+<pre><code>
+set_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, Persist::boolean()) -&gt; ok
+</code></pre>
+<br />
 
-<a name="start-0"></a>
-
-### start/0 ###
-
-`start() -> any()`
-
-Start the couchbeam process. Useful when testing using the shell.
+set a value and optionnaly persist it.
 
 <a name="start_autoreload-1"></a>
 
 ### start_autoreload/1 ###
 
-`start_autoreload(ConfigName) -> any()`
+<pre><code>
+start_autoreload(ConfigName::<a href="#type-conf">conf()</a>) -&gt; ok
+</code></pre>
+<br />
 
-<a name="stop-0"></a>
-
-### stop/0 ###
-
-`stop() -> any()`
-
-Stop the couchbeam process. Useful when testing using the shell.
+start the config watcher.
 
 <a name="stop_autoreload-1"></a>
 
 ### stop_autoreload/1 ###
 
-`stop_autoreload(ConfigName) -> any()`
+<pre><code>
+stop_autoreload(ConfigName::<a href="#type-conf">conf()</a>) -&gt; ok
+</code></pre>
+<br />
+
+stop the config watcher.
 
 <a name="subscribe-1"></a>
 
 ### subscribe/1 ###
 
-`subscribe(ConfigName) -> any()`
+<pre><code>
+subscribe(ConfigName::<a href="#type-conf">conf()</a>) -&gt; ok
+</code></pre>
+<br />
 
 Subscribe to config events for a config named `ConfigName`
 
@@ -244,7 +382,7 @@ The message received to each subscriber will be of the form:
 ### unregister_config/1 ###
 
 <pre><code>
-unregister_config(ConfigName::term()) -&gt; ok
+unregister_config(ConfigName::<a href="#type-conf">conf()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -254,7 +392,10 @@ unregister a conf
 
 ### unsubscribe/1 ###
 
-`unsubscribe(ConfigName) -> any()`
+<pre><code>
+unsubscribe(ConfigName::<a href="#type-conf">conf()</a>) -&gt; ok
+</code></pre>
+<br />
 
 Remove subscribtion created using `subscribe(ConfigName)`
 
