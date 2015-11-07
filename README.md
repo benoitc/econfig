@@ -1,5 +1,3 @@
-
-
 # econfig - simple Erlang config handler using INI files #
 
 Copyright (c) 2012-2015 Benoît Chesneau.
@@ -10,6 +8,9 @@ __Version:__ 0.6.0
 
 econfig is a simple Erlang config handler to manage a config from INI
 files.
+
+[![Build Status](https://travis-ci.org/benoitc/econfig.png?branch=master)](https://travis-ci.org/benoitc/econfig)
+[![Hex pm](http://img.shields.io/hexpm/v/econfig.svg?style=flat)](https://hex.pm/packages/econfig)
 
 econfig can be use to read and update INI files. Values are cached in an
 ETS table and you can manage multiple configuration profiles. A process
