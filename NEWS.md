@@ -1,5 +1,10 @@
 #econfig news
 
+0.6.4 - 2015-11-08
+------------------
+
+- fix: section updates should also be sent on simple updates
+
 0.6.3 - 2015-11-08
 ------------------
 
