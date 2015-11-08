@@ -254,7 +254,7 @@ get_list(ConfigName, Section, Key) ->
 
 %% @doc get a value and convert it to an list
 -spec get_list(ConfigName::config_name(), Section::section(), Key::any(), Default::list()) -> Value::list().
-get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
+get_list(ConfigName, Section, Key, Default) when is_list(Default) ->
     case get_list(ConfigName, Section, Key) of
         undefined -> Default;
         LVal -> LVal
@@ -278,7 +278,6 @@ get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
 
 
 to_boolean(Val) ->
-    io:format("val is ~p~n", [Val]),
     case string:to_lower(Val) of
         "true" -> true;
         "false" -> false;
@@ -326,6 +325,8 @@ to_binary(Val) ->
 
 -include_lib("eunit/include/eunit.hrl").
 
+-compile(export_all).
+
 fixture_path(Name) ->
     EbinDir = filename:dirname(code:which(?MODULE)),
     AppPath = filename:dirname(EbinDir),
@@ -351,6 +352,9 @@ cleanup(_State) ->
     error_logger:tty(true),
     ok = file:delete(fixture_path("local.ini")).
 
+config_change(Change) ->
+    ets:insert(econfig_test, Change).
+
 setup_change_fun() ->
     setup_common(),
     ets:new(econfig_test, [named_table, public]),
@@ -358,6 +362,11 @@ setup_change_fun() ->
                     ets:insert(econfig_test, Change)
                 end,
     ok = econfig:register_config(t, [fixture_path("test.ini"), fixture_path("local.ini")], [{change_fun, ChangeFun}]).
+
+setup_change_fun2() ->
+    setup_common(),
+    ets:new(econfig_test, [named_table, public]),
+    ok = econfig:register_config(t, [fixture_path("test.ini"), fixture_path("local.ini")], [{change_fun, {?MODULE, config_change}}]).
 
 cleanup_change_fun(State) ->
     ets:delete(econfig_test),
@@ -398,6 +407,7 @@ parse_with_helpers_test_() ->
           ?_assertEqual(false, econfig:get_boolean(t, "section4", "key33", false)),
           ?_assertMatch({'EXIT',{badarg, _}}, (catch econfig:get_boolean(t, "section4", "key4"))),
           ?_assertEqual(["a", "b"], econfig:get_list(t, "section4", "key4")),
+          ?_assertEqual(["c", "d"], econfig:get_list(t, "section4", "key44", ["c", "d"])),
           ?_assertEqual(1.4, econfig:get_float(t, "section4", "key5")),
           ?_assertEqual(<<"test">>, econfig:get_binary(t, "section4", "key6"))
          ]}.
@@ -635,6 +645,24 @@ subscribe_test_() ->
 change_fun_test_() ->
     {setup,
      fun setup_change_fun/0,
+     fun cleanup_change_fun/1,
+     [% test update
+      fun() ->
+          econfig:set_value(t, "section 2", "key666", "value666"),
+          Changes = ets:tab2list(econfig_test),
+          ?assertEqual([{config_updated, t, {set, {"section 2", "key666"}}}], Changes)
+      end,
+      % test subscribe delete
+      fun() ->
+          econfig:delete_value(t, "section 2", "key6"),
+          Changes = ets:tab2list(econfig_test),
+          ?assertEqual([{config_updated, t, {delete, {"section 2", "key6"}}}], Changes)
+      end
+     ]}.
+
+change_module_fun_test_() ->
+    {setup,
+     fun setup_change_fun2/0,
      fun cleanup_change_fun/1,
      [% test update
       fun() ->

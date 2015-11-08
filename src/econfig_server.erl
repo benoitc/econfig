@@ -257,14 +257,14 @@ init(_) ->
     InitialState = initialize_app_confs(),
     {ok, InitialState}.
 
-handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
-            #state{confs=Confs}=State) ->
+handle_call({register_conf, {ConfName, IniFiles, Options}}, _From, #state{confs=Confs}=State) ->
     {Resp, NewState} =
     try
         WriteFile = parse_inis(ConfName, IniFiles),
         {ok, Pid} = case proplists:get_value(autoreload, Options) of
                         true ->
-                            econfig_watcher_sup:start_watcher(ConfName, IniFiles);
+                            Res = econfig_watcher_sup:start_watcher(ConfName, IniFiles),
+                            Res;
                         Delay when is_integer(Delay) ->
                             econfig_watcher_sup:start_watcher(ConfName, IniFiles, Delay);
                         _ ->
@@ -645,11 +645,11 @@ check_fun(none) ->
 check_fun(Fun) when is_function(Fun) ->
     case erlang:fun_info(Fun, arity) of
         {arity, 1} -> ok;
-        _ -> badarg
+        _ -> {error, badarity}
     end;
-check_fun({Mod, Fun}) when is_atom(Mod), is_function(Fun) ->
+check_fun({Mod, Fun}) ->
     _ = code:ensure_loaded(Mod),
     case erlang:function_exported(Mod, Fun, 1) of
         true -> ok;
-        false -> badarg
+        false -> {error, function_not_exported}
     end.
