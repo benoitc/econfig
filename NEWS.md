@@ -1,5 +1,11 @@
 #econfig news
 
+0.6.2 - 2015-11-08
+------------------
+
+- register econfig_sup process.
+- fix doc
+
 0.6.1 - 2015-11-07
 ------------------
 
