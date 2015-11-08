@@ -371,6 +371,7 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
                 _ ->
                     true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1})
             end,
+            notify_change(State, ConfName, set, Section),
             notify_change(State, ConfName, set, Section, Key),
             {reply, ok, State};
         _Error ->
@@ -418,6 +419,7 @@ handle_call({del, {ConfName, Section, Key, Persist}}, _From,
         _ ->
             ok
     end,
+    notify_change(State, ConfName, set, Section),
     notify_change(State, ConfName, delete, Section, Key),
     {reply, ok, State};
 handle_call({mdel, {ConfName, Section, Persist}}, _From,

@@ -555,22 +555,52 @@ subscribe_test_() ->
       fun() ->
           econfig:subscribe(t),
           econfig:set_value(t, "section 2", "key666", "value666"),
+          Loop = fun
+            (Fun, Acc, 2) ->
+                lists:reverse(Acc);
+            (Fun, Acc, I) ->
+                receive
+                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
+                after 500 ->
+                    Fun(Fun, Acc, I + 1)
+                end
+            end,
+          Messages = Loop(Loop, [], 0),
           econfig:unsubscribe(t),
-          receive
-              Message ->
-                  ?assertEqual({config_updated, t, {set, {"section 2", "key666"}}}, Message)
-          end
+
+          Expected = [
+            {config_updated, t, {set, "section 2"}},
+            {config_updated,t, {set, {"section 2", "key666"}}}
+          ],
+
+           ?assertEqual(Expected, Messages)
       end,
+
       % test subscribe delete
       fun() ->
           econfig:subscribe(t),
           econfig:delete_value(t, "section 2", "key6"),
+          Loop = fun
+            (Fun, Acc, 2) ->
+                lists:reverse(Acc);
+            (Fun, Acc, I) ->
+                receive
+                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
+                after 500 ->
+                    Fun(Fun, Acc, I + 1)
+                end
+            end,
+          Messages = Loop(Loop, [], 0),
           econfig:unsubscribe(t),
-          receive
-              Message ->
-                  ?assertEqual({config_updated, t, {delete, {"section 2", "key6"}}}, Message)
-          end
+
+          Expected = [
+            {config_updated, t, {set, "section 2"}},
+            {config_updated,t, {delete, {"section 2", "key6"}}}
+          ],
+
+           ?assertEqual(Expected, Messages)
       end,
+
       %% test multiple updates
       fun() ->
           econfig:subscribe(t),
