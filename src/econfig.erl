@@ -87,7 +87,6 @@ open_config(ConfigName, IniFile, Options) ->
 %% - `{config_updated, ConfigName, reload}'
 %% - `{config_updated, ConfigName, registered}'
 %% - `{config_updated, ConfigName, unregistered}'
-%% - `{config_updated, ConfigName, {delete, {Section, Key}}'
 %% - `{config_updated, ConfigName, {set, {Section, Key}}'
 %% - `{config_updated, ConfigName, {delete, {Section, Key}}'
 %%

@@ -1,14 +1,9 @@
 #econfig news
 
-0.6.4 - 2015-11-08
+0.7.0 - 2015-11-08
 ------------------
 
-- fix: section updates should also be sent on simple updates
-
-0.6.3 - 2015-11-08
-------------------
-
-- fix: receive all events when deleting/updating multiple keys
+- fix notifications. Only exposes needed events and add tests
 
 0.6.2 - 2015-11-08
 ------------------
