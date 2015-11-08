@@ -1,5 +1,11 @@
 #econfig news
 
+0.7.1 - 2015-11-08
+------------------
+
+- fix bad case clause with config:get_list/4
+- fix bad case clause with {M, F} case in change_fun.
+
 0.7.0 - 2015-11-08
 ------------------
 
