@@ -392,9 +392,11 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
                                   Value1 = econfig_util:trim_whitespace(Value),
                                   if
                                       Value1 /= [] ->
-                                          true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1});
+                                          true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1}),
+                                          notify_change(State, ConfName, set, Section, Key);
                                       true ->
-                                          true = ets:delete(?TAB, {conf_key(ConfName), Section, Key})
+                                          true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
+                                          notify_change(State, ConfName, delete, Section, Key)
                                   end
                           end, List),
             notify_change(State, ConfName, set, Section),
@@ -423,6 +425,7 @@ handle_call({mdel, {ConfName, Section, Persist}}, _From,
     Matches = ets:match(?TAB, {{conf_key(ConfName), Section, '$1'}, '$2'}),
     ToDelete = lists:foldl(fun([Key, _Val], Acc) ->
                                    true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
+                                   notify_change(State, ConfName, delete, Section, Key),
                                    [{Key, ""} | Acc]
                            end, [], Matches),
 

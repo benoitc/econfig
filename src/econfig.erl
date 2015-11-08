@@ -571,6 +571,60 @@ subscribe_test_() ->
                   ?assertEqual({config_updated, t, {delete, {"section 2", "key6"}}}, Message)
           end
       end,
+      %% test multiple updates
+      fun() ->
+          econfig:subscribe(t),
+          econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
+          Loop = fun
+            (Fun, Acc, 3) ->
+                lists:reverse(Acc);
+            (Fun, Acc, I) ->
+                receive
+                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
+                after 5000 ->
+                    Fun(Fun, Acc, I + 1)
+                end
+            end,
+          Messages = Loop(Loop, [], 0),
+          econfig:unsubscribe(t),
+
+          Expected = [
+            {config_updated,t, {set, {"section10", "key1"}}},
+            {config_updated, t, {delete, {"section10", "key2"}}},
+            {config_updated, t, {set, "section10"}}
+          ],
+
+           ?assertEqual(Expected, Messages)
+       end,
+
+       %% test multiple delete
+      fun() ->
+          econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", "value2"}]),
+          econfig:subscribe(t),
+          econfig:delete_value(t, "section10"),
+          Loop = fun
+            (Fun, Acc, 3) ->
+                lists:reverse(Acc);
+            (Fun, Acc, I) ->
+                receive
+                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
+                after 500 ->
+                    Fun(Fun, Acc, I + 1)
+                end
+            end,
+          Messages = Loop(Loop, [], 0),
+          econfig:unsubscribe(t),
+
+          Expected = [
+            {config_updated,t, {delete, {"section10", "key1"}}},
+            {config_updated, t, {delete, {"section10", "key2"}}},
+            {config_updated, t, {delete, "section10"}}
+          ],
+
+           ?assertEqual(Expected, Messages)
+       end,
+
+
       % test unsubscribe
       fun() ->
           econfig:subscribe(t),
