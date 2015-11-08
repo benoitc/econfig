@@ -78,9 +78,9 @@ section() = string()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td>delete all key/values from a section.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value and persist the change to the file.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value and optionnally persist it.</td></tr><tr><td valign="top"><a href="#get_binary-3">get_binary/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_binary-4">get_binary/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_boolean-3">get_boolean/3</a></td><td>get a value and convert it to a boolean if possible
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#all-1">all/1</a></td><td>get all values of a configuration.</td></tr><tr><td valign="top"><a href="#cfg2list-1">cfg2list/1</a></td><td>retrive config as a proplist.</td></tr><tr><td valign="top"><a href="#cfg2list-2">cfg2list/2</a></td><td>retrieve config as a proplist.</td></tr><tr><td valign="top"><a href="#delete_value-2">delete_value/2</a></td><td>delete all key/values from a section.</td></tr><tr><td valign="top"><a href="#delete_value-3">delete_value/3</a></td><td>delete a value and persist the change to the file.</td></tr><tr><td valign="top"><a href="#delete_value-4">delete_value/4</a></td><td>delete a value and optionnally persist it.</td></tr><tr><td valign="top"><a href="#get_binary-3">get_binary/3</a></td><td>get a value and convert it to an binary.</td></tr><tr><td valign="top"><a href="#get_binary-4">get_binary/4</a></td><td>get a value and convert it to an binary.</td></tr><tr><td valign="top"><a href="#get_boolean-3">get_boolean/3</a></td><td>get a value and convert it to a boolean if possible
 This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
-a badarg error is raised if the value can't be parsed to a boolean.</td></tr><tr><td valign="top"><a href="#get_boolean-4">get_boolean/4</a></td><td>get a value and convert it to a boolean if possible.</td></tr><tr><td valign="top"><a href="#get_float-3">get_float/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_float-4">get_float/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_integer-3">get_integer/3</a></td><td>get a value and convert it to an integer.</td></tr><tr><td valign="top"><a href="#get_integer-4">get_integer/4</a></td><td>get a value and convert it to an integer.</td></tr><tr><td valign="top"><a href="#get_list-3">get_list/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_list-4">get_list/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get keys/values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td></td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
+a badarg error is raised if the value can't be parsed to a boolean.</td></tr><tr><td valign="top"><a href="#get_boolean-4">get_boolean/4</a></td><td>get a value and convert it to a boolean if possible.</td></tr><tr><td valign="top"><a href="#get_float-3">get_float/3</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_float-4">get_float/4</a></td><td>get a value and convert it to an float.</td></tr><tr><td valign="top"><a href="#get_integer-3">get_integer/3</a></td><td>get a value and convert it to an integer.</td></tr><tr><td valign="top"><a href="#get_integer-4">get_integer/4</a></td><td>get a value and convert it to an integer.</td></tr><tr><td valign="top"><a href="#get_list-3">get_list/3</a></td><td>get a value and convert it to an list.</td></tr><tr><td valign="top"><a href="#get_list-4">get_list/4</a></td><td>get a value and convert it to an list.</td></tr><tr><td valign="top"><a href="#get_value-2">get_value/2</a></td><td>get keys/values of a section.</td></tr><tr><td valign="top"><a href="#get_value-3">get_value/3</a></td><td>get value for a key in a section.</td></tr><tr><td valign="top"><a href="#get_value-4">get_value/4</a></td><td>get value for a key in a section or return the default value if not set.</td></tr><tr><td valign="top"><a href="#open_config-2">open_config/2</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#open_config-3">open_config/3</a></td><td>open or create an ini file an register it.</td></tr><tr><td valign="top"><a href="#prefix-2">prefix/2</a></td><td>get all sections starting by Prefix.</td></tr><tr><td valign="top"><a href="#register_config-2">register_config/2</a></td><td>register inifiles or config dirs.</td></tr><tr><td valign="top"><a href="#register_config-3">register_config/3</a></td><td>register inifiles of config dirs with options
 For now the only option is<code>autoreload</code> to auto reload the config on
 files or dirs changes.</td></tr><tr><td valign="top"><a href="#reload-1">reload/1</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#reload-2">reload/2</a></td><td>reload the configuration.</td></tr><tr><td valign="top"><a href="#sections-1">sections/1</a></td><td>get all sections of a configuration.</td></tr><tr><td valign="top"><a href="#set_value-3">set_value/3</a></td><td>set a list of key/value for a section.</td></tr><tr><td valign="top"><a href="#set_value-4">set_value/4</a></td><td>set a value and persist it to the file.</td></tr><tr><td valign="top"><a href="#set_value-5">set_value/5</a></td><td>set a value and optionnaly persist it.</td></tr><tr><td valign="top"><a href="#start_autoreload-1">start_autoreload/1</a></td><td>start the config watcher.</td></tr><tr><td valign="top"><a href="#stop_autoreload-1">stop_autoreload/1</a></td><td>stop the config watcher.</td></tr><tr><td valign="top"><a href="#subscribe-1">subscribe/1</a></td><td>Subscribe to config events for a config named <code>ConfigName</code></td></tr><tr><td valign="top"><a href="#unregister_config-1">unregister_config/1</a></td><td>unregister a conf.</td></tr><tr><td valign="top"><a href="#unsubscribe-1">unsubscribe/1</a></td><td>Remove subscribtion created using <code>subscribe(ConfigName)</code>.</td></tr></table>
 
@@ -164,7 +164,7 @@ get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-
 </code></pre>
 <br />
 
-get a value and convert it to an float
+get a value and convert it to an binary
 
 <a name="get_binary-4"></a>
 
@@ -175,7 +175,7 @@ get_binary(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-
 </code></pre>
 <br />
 
-get a value and convert it to an float
+get a value and convert it to an binary
 
 <a name="get_boolean-3"></a>
 
@@ -256,7 +256,7 @@ get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-se
 </code></pre>
 <br />
 
-get a value and convert it to an float
+get a value and convert it to an list
 
 <a name="get_list-4"></a>
 
@@ -267,7 +267,7 @@ get_list(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-se
 </code></pre>
 <br />
 
-get a value and convert it to an float
+get a value and convert it to an list
 
 <a name="get_value-2"></a>
 
@@ -299,6 +299,8 @@ get value for a key in a section
 get_value(ConfigName::<a href="#type-conf">conf()</a>, Section::<a href="#type-section">section()</a>, Key::any(), Default::any()) -&gt; Value::string()
 </code></pre>
 <br />
+
+get value for a key in a section or return the default value if not set
 
 <a name="open_config-2"></a>
 

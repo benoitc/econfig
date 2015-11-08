@@ -152,6 +152,7 @@ get_value(ConfigName, Section) ->
 get_value(ConfigName, Section, Key) ->
     econfig_server:get_value(ConfigName, Section, Key).
 
+%% @doc get value for a key in a section or return the default value if not set
 -spec get_value(ConfigName::conf(), Section::section(), Key::any(), Default::any()) -> Value::string().
 get_value(ConfigName, Section, Key, Default) ->
     econfig_server:get_value(ConfigName, Section, Key, Default).
@@ -238,7 +239,7 @@ get_float(ConfigName, Section, Key, Default) when is_float(Default) ->
         IVal -> IVal
     end.
 
-%% @doc get a value and convert it to an float
+%% @doc get a value and convert it to an list
 -spec get_list(ConfigName::conf(), Section::section(), Key::any()) -> Value::list() | undefined.
 get_list(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
@@ -246,7 +247,7 @@ get_list(ConfigName, Section, Key) ->
         Val -> to_list(Val)
     end.
 
-%% @doc get a value and convert it to an float
+%% @doc get a value and convert it to an list
 -spec get_list(ConfigName::conf(), Section::section(), Key::any(), Default::list()) -> Value::list().
 get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
     case get_list(ConfigName, Section, Key) of
@@ -254,7 +255,7 @@ get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
         LVal -> LVal
     end.
 
-%% @doc get a value and convert it to an float
+%% @doc get a value and convert it to an binary
 -spec get_binary(ConfigName::conf(), Section::section(), Key::any()) -> Value::binary() | undefined.
 get_binary(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
@@ -262,7 +263,7 @@ get_binary(ConfigName, Section, Key) ->
         Val -> to_binary(Val)
     end.
 
-%% @doc get a value and convert it to an float
+%% @doc get a value and convert it to an binary
 -spec get_binary(ConfigName::conf(), Section::section(), Key::any(), Default::binary()) -> Value::binary().
 get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
     case get_binary(ConfigName, Section, Key) of
