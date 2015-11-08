@@ -1,5 +1,10 @@
 #econfig news
 
+0.6.3 - 2015-11-08
+------------------
+
+- fix: receive all events when deleting/updating multiple keys
+
 0.6.2 - 2015-11-08
 ------------------
 
