@@ -49,9 +49,7 @@ register_config(ConfigName, IniFiles) ->
     register_config(ConfigName, IniFiles, []).
 
 register_config(ConfigName, IniFiles, Options) ->
-    gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles,
-                                              Options}},
-                    infinity).
+    gen_server:call(?MODULE, {register_conf, {ConfigName, IniFiles, Options}}, infinity).
 
 %% @doc unregister a conf
 unregister_config(ConfigName) ->
@@ -75,14 +73,6 @@ open_config(ConfigName, IniFile, Options) ->
                     Error
             end
     end.
-
-%% @doc Subscribe to config events for a config named `ConfigName'
-%%
-%% The message received to each subscriber will be of the form:
-%%
-%% `{config_updated, ConfigName, {Section, Key}}'
-%%
-%% @end
 subscribe(ConfigName) ->
     Key = {sub, ConfigName, self()},
     case ets:insert_new(?TAB, {Key, self()}) of
@@ -289,7 +279,9 @@ handle_call({register_conf, {ConfName, IniFiles, Options}}, _From,
                                               options=Options,
                                               inifiles=IniFiles},
                             Confs),
-        {ok, State#state{confs=Confs1}}
+        State2 = State#state{confs=Confs1},
+        notify_change(State2, ConfName, registered),
+        {ok, State2#state{confs=Confs1}}
     catch _Tag:Error ->
               {{error, Error}, State}
     end,
@@ -299,7 +291,8 @@ handle_call({unregister_conf, ConfName}, _From, #state{confs=Confs}=State) ->
     true = ets:match_delete(?TAB, {{conf_key(ConfName), '_', '_'}, '_'}),
     case dict:find(ConfName, Confs) of
         {ok, #config{pid=Pid}} when is_pid(Pid) ->
-            supervisor:terminate_child(econfig_watcher_sup, Pid);
+            supervisor:terminate_child(econfig_watcher_sup, Pid),
+            notify_change(State, ConfName, unregistered);
         _ ->
             ok
     end,
@@ -323,8 +316,9 @@ handle_call({reload, {ConfName, IniFiles0}}, _From,
                                                       options=Options,
                                                       inifiles=IniFiles},
                                 Confs),
-            notify_change(State, ConfName, reload),
-            {reply, ok, State#state{confs=Confs1}};
+            State2 = State#state{confs=Confs1},
+            notify_change(State2, ConfName, reload),
+            {reply, ok, State2};
         _ ->
             {reply, ok, State}
     end;
@@ -371,8 +365,7 @@ handle_call({set, {ConfName, Section, Key, Value, Persist}}, _From,
                 _ ->
                     true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1})
             end,
-            notify_change(State, ConfName, set, Section),
-            notify_change(State, ConfName, set, Section, Key),
+            notify_change(State, ConfName, {set, {Section, Key}}),
             {reply, ok, State};
         _Error ->
             {reply, Result, State}
@@ -394,13 +387,12 @@ handle_call({mset, {ConfName, Section, List, Persist}}, _From,
                                   if
                                       Value1 /= [] ->
                                           true = ets:insert(?TAB, {{conf_key(ConfName), Section, Key}, Value1}),
-                                          notify_change(State, ConfName, set, Section, Key);
+                                          notify_change(State, ConfName, {set, {Section, Key}});
                                       true ->
                                           true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
-                                          notify_change(State, ConfName, delete, Section, Key)
+                                          notify_change(State, ConfName, {delete, {Section, Key}})
                                   end
                           end, List),
-            notify_change(State, ConfName, set, Section),
             {reply, ok, State};
         _Error ->
             {reply, Result, State}
@@ -419,15 +411,14 @@ handle_call({del, {ConfName, Section, Key, Persist}}, _From,
         _ ->
             ok
     end,
-    notify_change(State, ConfName, set, Section),
-    notify_change(State, ConfName, delete, Section, Key),
+    notify_change(State, ConfName, {delete, {Section, Key}}),
     {reply, ok, State};
 handle_call({mdel, {ConfName, Section, Persist}}, _From,
             #state{confs=Confs}=State) ->
     Matches = ets:match(?TAB, {{conf_key(ConfName), Section, '$1'}, '$2'}),
     ToDelete = lists:foldl(fun([Key, _Val], Acc) ->
                                    true = ets:delete(?TAB, {conf_key(ConfName), Section, Key}),
-                                   notify_change(State, ConfName, delete, Section, Key),
+                                   notify_change(State, ConfName, {delete, {Section, Key}}),
                                    [{Key, ""} | Acc]
                            end, [], Matches),
 
@@ -439,14 +430,14 @@ handle_call({mdel, {ConfName, Section, Persist}}, _From,
         _ ->
             ok
     end,
-    notify_change(State, ConfName, delete, Section),
     {reply, ok, State};
 
 handle_call({unsub, ConfName}, {Pid, _}, State) ->
     Key = {sub, ConfName, Pid},
     case ets:lookup(?TAB, Key) of
         [{Key, Pid}] ->
-            _ = ets:delete(?TAB, Key);
+            _ = ets:delete(?TAB, Key),
+            _ = ets:delete(?TAB, {Pid, ConfName});
         [] -> ok
     end,
     {reply, ok, State};
@@ -490,18 +481,8 @@ maybe_pause(#config{pid=Pid}, Fun) when is_pid(Pid) ->
 maybe_pause(_, Fun) ->
     Fun().
 
-notify_change(State, ConfigName, Type) ->
-    Msg = {config_updated, ConfigName, Type},
-    run_change_fun(State, ConfigName, Msg),
-    send(ConfigName, Msg).
-
-notify_change(State, ConfigName, Type, Section) ->
-    Msg = {config_updated, ConfigName, {Type, Section}},
-    run_change_fun(State, ConfigName, Msg),
-    send(ConfigName, Msg).
-
-notify_change(State, ConfigName, Type, Section, Key) ->
-    Msg = {config_updated, ConfigName, {Type, {Section, Key}}},
+notify_change(State, ConfigName, Event) ->
+    Msg = {config_updated, ConfigName, Event},
     run_change_fun(State, ConfigName, Msg),
     send(ConfigName, Msg).
 
@@ -529,8 +510,10 @@ apply_change_fun(F, Msg) -> F(Msg).
 
 initialize_app_confs() ->
     case application:get_env(econfig, confs) of
-        undefined -> #state{};
-        {ok, Confs} -> initialize_app_confs1(Confs, #state{})
+        undefined ->
+            #state{};
+        {ok, Confs} ->
+            initialize_app_confs1(Confs, #state{})
     end.
 
 initialize_app_confs1([], State) ->
@@ -653,7 +636,6 @@ process_is_down(Pid) when is_pid(Pid) ->
                     ets:delete(?TAB, {Pid, ConfName}),
                     ets:delete(?TAB, SubKey)
                 end, Subs),
-
             ets:delete(?TAB, Pid),
             ok
     end.

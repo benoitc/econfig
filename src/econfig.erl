@@ -27,7 +27,7 @@
          get_list/3, get_list/4,
          get_binary/3, get_binary/4]).
 
--type conf() :: atom() | string() | binary().
+-type config_name() :: atom() | string() | binary().
 -type inifile() :: string().
 -type inifiles() :: [inifile()].
 -type config_options() :: [autoreload | {autoreload, integer}
@@ -35,10 +35,10 @@
 -type section() :: string().
 -type kvs() :: [{any(), any()}].
 
--export_type([conf/0, inifile/0, inifiles/0, config_options/0, section/0,  kvs/0]).
+-export_type([config_name/0, inifile/0, inifiles/0, config_options/0, section/0,  kvs/0]).
 
 %% @doc register inifiles or config dirs
--spec register_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
+-spec register_config(ConfigName::config_name(), IniFiles::inifiles()) -> ok | {error, any()}.
 register_config(ConfigName, IniFiles) ->
     econfig_server:register_config(ConfigName, IniFiles).
 
@@ -58,24 +58,24 @@ register_config(ConfigName, IniFiles) ->
 %%  changes. Delay set the time between each scan. Default is 5000
 %%  and can be set using the `scan_delay' application environement
 %%  for econfig.
--spec register_config(ConfigName::conf(), IniFiles::inifiles(), Options::config_options()) -> ok | {error, any()}.
+-spec register_config(ConfigName::config_name(), IniFiles::inifiles(), Options::config_options()) -> ok | {error, any()}.
 register_config(ConfigName, IniFiles, Options) ->
     econfig_server:register_config(ConfigName, IniFiles, Options).
 
 
 %% @doc unregister a conf
--spec unregister_config(conf()) -> ok.
+-spec unregister_config(config_name()) -> ok.
 unregister_config(ConfigName) ->
     econfig_server:unregister_config(ConfigName).
 
 %% @doc open or create an ini file an register it
--spec open_config(ConfigName::conf(), IniFiles::inifiles()) -> ok | {error, any()}.
+-spec open_config(ConfigName::config_name(), IniFiles::inifiles()) -> ok | {error, any()}.
 open_config(ConfigName, IniFile) ->
     econfig_server:open_config(ConfigName, IniFile).
 
 %% @doc open or create an ini file an register it. See the
 %% register_config function for a list of available functions.
--spec open_config(ConfigName::conf(), IniFiles::inifiles(), Options::config_options()) -> ok | {error, any()}.
+-spec open_config(ConfigName::config_name(), IniFiles::inifiles(), Options::config_options()) -> ok | {error, any()}.
 open_config(ConfigName, IniFile, Options) ->
     econfig_server:open_config(ConfigName, IniFile, Options).
 
@@ -83,114 +83,120 @@ open_config(ConfigName, IniFile, Options) ->
 %%
 %% The message received to each subscriber will be of the form:
 %%
-%% `{config_updated, ConfigName, {Section, Key}}'
+%%
+%% - `{config_updated, ConfigName, reload}'
+%% - `{config_updated, ConfigName, registered}'
+%% - `{config_updated, ConfigName, unregistered}'
+%% - `{config_updated, ConfigName, {delete, {Section, Key}}'
+%% - `{config_updated, ConfigName, {set, {Section, Key}}'
+%% - `{config_updated, ConfigName, {delete, {Section, Key}}'
 %%
 %% @end
--spec subscribe(ConfigName::conf()) -> ok.
+-spec subscribe(ConfigName::config_name()) -> ok.
 subscribe(ConfigName) ->
     econfig_server:subscribe(ConfigName).
 
-%% @doc Remove subscribtion created using `subscribe(ConfigName)'
+%% @doc Remove all subscribtions to ConfigName events for this process
 %%
 %% @end
--spec unsubscribe(ConfigName::conf()) -> ok.
+-spec unsubscribe(ConfigName::config_name()) -> ok.
 unsubscribe(ConfigName) ->
     econfig_server:unsubscribe(ConfigName).
 
 %% @doc reload the configuration
--spec reload(ConfigName::conf()) -> ok.
+-spec reload(ConfigName::config_name()) -> ok.
 reload(ConfigName) ->
     econfig_server:reload(ConfigName).
 
 %% @doc reload the configuration
--spec reload(ConfigName::conf(), IniFiles::inifiles()) -> ok.
+-spec reload(ConfigName::config_name(), IniFiles::inifiles()) -> ok.
 reload(ConfigName, IniFiles) ->
     econfig_server:reload(ConfigName, IniFiles).
 
 %% @doc start the config watcher.
--spec start_autoreload(ConfigName::conf()) -> ok.
+-spec start_autoreload(ConfigName::config_name()) -> ok.
 start_autoreload(ConfigName) ->
     econfig_server:start_autoreload(ConfigName).
 
 %% @doc stop the config watcher.
--spec stop_autoreload(ConfigName::conf()) -> ok.
+-spec stop_autoreload(ConfigName::config_name()) -> ok.
 stop_autoreload(ConfigName) ->
     econfig_server:stop_autoreload(ConfigName).
 
 %% @doc get all values of a configuration
--spec all(ConfigName::conf()) -> [{section(), [{string(), string()}]}].
+-spec all(ConfigName::config_name()) -> [{section(), [{string(), string()}]}].
 all(ConfigName) ->
     econfig_server:all(ConfigName).
 
 %% @doc get all sections of a configuration
--spec sections(ConfigName::conf()) -> [section()].
+-spec sections(ConfigName::config_name()) -> [section()].
 sections(ConfigName) ->
     econfig_server:sections(ConfigName).
 
 %% @doc get all sections starting by Prefix
--spec prefix(ConfigName::conf(), Prefix::string()) -> [{section(), [{string(), string()}]}].
+-spec prefix(ConfigName::config_name(), Prefix::string()) -> [{section(), [{string(), string()}]}].
 prefix(ConfigName, Prefix) ->
     econfig_server:prefix(ConfigName, Prefix).
 
 %% @doc retrive config as a proplist
--spec cfg2list(ConfigName::conf()) -> [{section(), [{string(), string()}]}].
+-spec cfg2list(ConfigName::config_name()) -> [{section(), [{string(), string()}]}].
 cfg2list(ConfigName) ->
     econfig_server:cfg2list(ConfigName).
 
 %% @doc retrieve config as a proplist
--spec cfg2list(ConfigName::conf(), GroupKey::string()) -> [{section(), [{string(), string()}]}].
+-spec cfg2list(ConfigName::config_name(), GroupKey::string()) -> [{section(), [{string(), string()}]}].
 cfg2list(ConfigName, GroupKey) ->
     econfig_server:cfg2list(ConfigName, GroupKey).
 
 %% @doc get keys/values of a section
--spec get_value(ConfigName::conf(), Section::string()) -> [{string(), string()}].
+-spec get_value(ConfigName::config_name(), Section::string()) -> [{string(), string()}].
 get_value(ConfigName, Section) ->
     econfig_server:get_value(ConfigName, Section).
 
 %% @doc get value for a key in a section
--spec get_value(ConfigName::conf(), Section::section(), Key::any()) -> Value::string() | undefined.
+-spec get_value(ConfigName::config_name(), Section::section(), Key::any()) -> Value::string() | undefined.
 get_value(ConfigName, Section, Key) ->
     econfig_server:get_value(ConfigName, Section, Key).
 
 %% @doc get value for a key in a section or return the default value if not set
--spec get_value(ConfigName::conf(), Section::section(), Key::any(), Default::any()) -> Value::string().
+-spec get_value(ConfigName::config_name(), Section::section(), Key::any(), Default::any()) -> Value::string().
 get_value(ConfigName, Section, Key, Default) ->
     econfig_server:get_value(ConfigName, Section, Key, Default).
 
 %% @doc set a list of key/value for a section
--spec set_value(ConfigName::conf(), Section::section(), KVs::kvs()) -> ok.
+-spec set_value(ConfigName::config_name(), Section::section(), KVs::kvs()) -> ok.
 set_value(ConfigName, Section, KVs) ->
     econfig_server:set_value(ConfigName, Section, KVs).
 
 %% @doc set a value and persist it to the file
--spec set_value(ConfigName::conf(), Section::section(), Key::any(), Value::any()) -> ok.
+-spec set_value(ConfigName::config_name(), Section::section(), Key::any(), Value::any()) -> ok.
 set_value(ConfigName, Section, Key, Value) ->
     set_value(ConfigName, Section, Key, Value, true).
 
 %% @doc set a value and optionnaly persist it.
--spec set_value(ConfigName::conf(), Section::section(), Key::any(), Value::any(), Persist::boolean()) -> ok.
+-spec set_value(ConfigName::config_name(), Section::section(), Key::any(), Value::any(), Persist::boolean()) -> ok.
 set_value(ConfigName, Section, Key, Value, Persist) ->
     econfig_server:set_value(ConfigName, Section, Key, Value, Persist).
 
 %% @doc delete all key/values from a section
--spec delete_value(ConfigName::conf(), Section::section()) -> ok.
+-spec delete_value(ConfigName::config_name(), Section::section()) -> ok.
 delete_value(ConfigName, Section) ->
     econfig_server:delete_value(ConfigName, Section).
 
 %% @doc delete a value and persist the change to the file
--spec delete_value(ConfigName::conf(), Section::section(), Key::any()) -> ok.
+-spec delete_value(ConfigName::config_name(), Section::section(), Key::any()) -> ok.
 delete_value(ConfigName, Section, Key) ->
     econfig_server:delete_value(ConfigName, Section, Key).
 
 %% @doc delete a value and optionnally persist it
--spec delete_value(ConfigName::conf(), Section::section(), Key::any(), Persist::boolean()) -> ok.
+-spec delete_value(ConfigName::config_name(), Section::section(), Key::any(), Persist::boolean()) -> ok.
 delete_value(ConfigName, Section, Key, Persist) ->
     econfig_server:delete_value(ConfigName, Section, Key, Persist).
 
 %% @doc get a value and convert it to a boolean if possible
 %% This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
 %% a badarg error is raised if the value can't be parsed to a boolean
--spec get_boolean(ConfigName::conf(), Section::section(), Key::any()) -> Value::boolean() | undefined.
+-spec get_boolean(ConfigName::config_name(), Section::section(), Key::any()) -> Value::boolean() | undefined.
 get_boolean(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -200,7 +206,7 @@ get_boolean(ConfigName, Section, Key) ->
 %% @doc get a value and convert it to a boolean if possible. It fallback to default if not set.
 %% This method is case-insensitive and recognizes Boolean values from 'yes'/'no', 'on'/'off', 'true'/'false' and '1'/'0'
 %% a badarg error is raised if the value can't be parsed to a boolean
--spec get_boolean(ConfigName::conf(), Section::section(), Key::any(), Default::boolean()) -> Value::boolean().
+-spec get_boolean(ConfigName::config_name(), Section::section(), Key::any(), Default::boolean()) -> Value::boolean().
 get_boolean(ConfigName, Section, Key, Default) when is_boolean(Default) ->
     case get_boolean(ConfigName, Section, Key) of
         undefined -> Default;
@@ -208,7 +214,7 @@ get_boolean(ConfigName, Section, Key, Default) when is_boolean(Default) ->
     end.
 
 %% @doc get a value and convert it to an integer
--spec get_integer(ConfigName::conf(), Section::section(), Key::any()) -> Value::integer() | undefined.
+-spec get_integer(ConfigName::config_name(), Section::section(), Key::any()) -> Value::integer() | undefined.
 get_integer(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -216,7 +222,7 @@ get_integer(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an integer
--spec get_integer(ConfigName::conf(), Section::section(), Key::any(), Default::integer()) -> Value::integer().
+-spec get_integer(ConfigName::config_name(), Section::section(), Key::any(), Default::integer()) -> Value::integer().
 get_integer(ConfigName, Section, Key, Default) when is_integer(Default) ->
     case get_integer(ConfigName, Section, Key) of
         undefined -> Default;
@@ -224,7 +230,7 @@ get_integer(ConfigName, Section, Key, Default) when is_integer(Default) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_float(ConfigName::conf(), Section::section(), Key::any()) -> Value::float() | undefined.
+-spec get_float(ConfigName::config_name(), Section::section(), Key::any()) -> Value::float() | undefined.
 get_float(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -232,7 +238,7 @@ get_float(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an float
--spec get_float(ConfigName::conf(), Section::section(), Key::any(), Default::float()) -> Value::float().
+-spec get_float(ConfigName::config_name(), Section::section(), Key::any(), Default::float()) -> Value::float().
 get_float(ConfigName, Section, Key, Default) when is_float(Default) ->
     case get_float(ConfigName, Section, Key) of
         undefined -> Default;
@@ -240,7 +246,7 @@ get_float(ConfigName, Section, Key, Default) when is_float(Default) ->
     end.
 
 %% @doc get a value and convert it to an list
--spec get_list(ConfigName::conf(), Section::section(), Key::any()) -> Value::list() | undefined.
+-spec get_list(ConfigName::config_name(), Section::section(), Key::any()) -> Value::list() | undefined.
 get_list(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -248,7 +254,7 @@ get_list(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an list
--spec get_list(ConfigName::conf(), Section::section(), Key::any(), Default::list()) -> Value::list().
+-spec get_list(ConfigName::config_name(), Section::section(), Key::any(), Default::list()) -> Value::list().
 get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
     case get_list(ConfigName, Section, Key) of
         undefined -> Default;
@@ -256,7 +262,7 @@ get_list(ConfigName, Section, Key, Default) when is_float(Default) ->
     end.
 
 %% @doc get a value and convert it to an binary
--spec get_binary(ConfigName::conf(), Section::section(), Key::any()) -> Value::binary() | undefined.
+-spec get_binary(ConfigName::config_name(), Section::section(), Key::any()) -> Value::binary() | undefined.
 get_binary(ConfigName, Section, Key) ->
     case get_value(ConfigName, Section, Key) of
         undefined -> undefined;
@@ -264,7 +270,7 @@ get_binary(ConfigName, Section, Key) ->
     end.
 
 %% @doc get a value and convert it to an binary
--spec get_binary(ConfigName::conf(), Section::section(), Key::any(), Default::binary()) -> Value::binary().
+-spec get_binary(ConfigName::config_name(), Section::section(), Key::any(), Default::binary()) -> Value::binary().
 get_binary(ConfigName, Section, Key, Default) when is_binary(Default) ->
     case get_binary(ConfigName, Section, Key) of
         undefined -> Default;
@@ -551,25 +557,15 @@ subscribe_test_() ->
           ResultUnsubscribe = econfig:unsubscribe(t),
           ?assertEqual([ok, ok], [ResultSubscribe, ResultUnsubscribe])
       end,
+
       % test subscribe update
       fun() ->
           econfig:subscribe(t),
           econfig:set_value(t, "section 2", "key666", "value666"),
-          Loop = fun
-            (Fun, Acc, 2) ->
-                lists:reverse(Acc);
-            (Fun, Acc, I) ->
-                receive
-                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
-                after 500 ->
-                    Fun(Fun, Acc, I + 1)
-                end
-            end,
-          Messages = Loop(Loop, [], 0),
+          Messages = changes_loop([], 0, 1),
           econfig:unsubscribe(t),
 
           Expected = [
-            {config_updated, t, {set, "section 2"}},
             {config_updated,t, {set, {"section 2", "key666"}}}
           ],
 
@@ -580,22 +576,11 @@ subscribe_test_() ->
       fun() ->
           econfig:subscribe(t),
           econfig:delete_value(t, "section 2", "key6"),
-          Loop = fun
-            (Fun, Acc, 2) ->
-                lists:reverse(Acc);
-            (Fun, Acc, I) ->
-                receive
-                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
-                after 500 ->
-                    Fun(Fun, Acc, I + 1)
-                end
-            end,
-          Messages = Loop(Loop, [], 0),
+          Messages = changes_loop([], 0, 2),
           econfig:unsubscribe(t),
 
           Expected = [
-            {config_updated, t, {set, "section 2"}},
-            {config_updated,t, {delete, {"section 2", "key6"}}}
+            {config_updated, t, {delete, {"section 2", "key6"}}}
           ],
 
            ?assertEqual(Expected, Messages)
@@ -605,23 +590,12 @@ subscribe_test_() ->
       fun() ->
           econfig:subscribe(t),
           econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", ""}]),
-          Loop = fun
-            (Fun, Acc, 3) ->
-                lists:reverse(Acc);
-            (Fun, Acc, I) ->
-                receive
-                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
-                after 5000 ->
-                    Fun(Fun, Acc, I + 1)
-                end
-            end,
-          Messages = Loop(Loop, [], 0),
+          Messages = changes_loop([], 0, 2),
           econfig:unsubscribe(t),
 
           Expected = [
             {config_updated,t, {set, {"section10", "key1"}}},
-            {config_updated, t, {delete, {"section10", "key2"}}},
-            {config_updated, t, {set, "section10"}}
+            {config_updated, t, {delete, {"section10", "key2"}}}
           ],
 
            ?assertEqual(Expected, Messages)
@@ -632,23 +606,12 @@ subscribe_test_() ->
           econfig:set_value(t, "section10", [{"key1", "value1"}, {"key2", "value2"}]),
           econfig:subscribe(t),
           econfig:delete_value(t, "section10"),
-          Loop = fun
-            (Fun, Acc, 3) ->
-                lists:reverse(Acc);
-            (Fun, Acc, I) ->
-                receive
-                    Msg -> Fun(Fun, [Msg | Acc], I + 1)
-                after 500 ->
-                    Fun(Fun, Acc, I + 1)
-                end
-            end,
-          Messages = Loop(Loop, [], 0),
+          Messages = changes_loop([], 0, 2),
           econfig:unsubscribe(t),
 
           Expected = [
             {config_updated,t, {delete, {"section10", "key1"}}},
-            {config_updated, t, {delete, {"section10", "key2"}}},
-            {config_updated, t, {delete, "section10"}}
+            {config_updated, t, {delete, {"section10", "key2"}}}
           ],
 
            ?assertEqual(Expected, Messages)
@@ -687,5 +650,15 @@ change_fun_test_() ->
           ?assertEqual([{config_updated, t, {delete, {"section 2", "key6"}}}], Changes)
       end
      ]}.
+
+changes_loop(Acc, Max, Max) -> 
+  lists:reverse(Acc);
+changes_loop(Acc, I, Max) ->
+  receive
+      Msg -> changes_loop([Msg | Acc], I + 1, Max)
+  after 500 ->
+      changes_loop(Acc, I + 1, Max)
+end.
+
 
 -endif.
