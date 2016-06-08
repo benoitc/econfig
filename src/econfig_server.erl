@@ -122,14 +122,10 @@ sections(ConfigName) ->
 prefix(ConfigName, Prefix) ->
     Matches = ets:match(?TAB, {{conf_key(ConfigName), '$1', '_'}, '_'}),
     Found = lists:foldl(fun([Match], Acc) ->
-                    case re:split(Match, Prefix, [{return,list}]) of
-                        [Match] -> Acc;
-                        _ ->
-                            case lists:member(Match, Acc) of
-                                true -> Acc;
-                                false -> [Match | Acc]
+                            case lists:prefix(Prefix, Match) of
+                              true -> [Match | Acc];
+                              false -> Acc
                             end
-                    end
             end, [], Matches),
     lists:reverse(Found).
 
