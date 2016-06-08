@@ -2,9 +2,9 @@
 
 # econfig - simple Erlang config handler using INI files #
 
-Copyright (c) 2012-2015 Benoît Chesneau.
+Copyright (c) 2012-2016 Benoît Chesneau.
 
-__Version:__ 0.7.1
+__Version:__ 0.7.2
 
 # econfig
 
