@@ -9,10 +9,9 @@
   {applications, [kernel,
                   stdlib]},
   {mod, { econfig_app, []}},
-  {env, []},
-
   {maintainers, ["Benoit Chesneau"]},
   {licenses, ["Apache License 2"]},
-  {links, [{"Github", "https://github.com/benoitc/econfig"}]}
+  {links, [{"Github", "https://github.com/benoitc/econfig"}]},
 
+  {requirements, [{}]}
  ]}.
