@@ -12,7 +12,7 @@
   {env, []},
 
   {maintainers, ["Benoit Chesneau"]},
-  {license, ["Apache License 2"]},
+  {licenses, ["Apache License 2"]},
   {links, [{"Github", "https://github.com/benoitc/econfig"}]}
 
  ]}.
