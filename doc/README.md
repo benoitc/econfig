@@ -4,7 +4,7 @@
 
 Copyright (c) 2012-2016 Benoît Chesneau.
 
-__Version:__ 0.7.2
+__Version:__ 0.7.3
 
 # econfig
 
