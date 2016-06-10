@@ -127,7 +127,7 @@ prefix(ConfigName, Prefix) ->
                               false -> Acc
                             end
             end, [], Matches),
-    lists:reverse(Found).
+    lists:reverse(lists:usort(Found)).
 
 %% @doc retrive config as a proplist
 cfg2list(ConfigName) ->
